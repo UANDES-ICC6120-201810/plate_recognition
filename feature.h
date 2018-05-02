@@ -28,25 +28,30 @@ static int colorPixelsAmount(Mat img, bool black_pixel = true) {
         return white;
 }
 
-static vector<float> calculateImageFeatures(Mat src_image) {
-    Mat img;
+Mat cleanSourceImage(Mat source_image) {
+    Mat clean_image;
     if (src_image.channels() == 3) {
-        cvtColor(src_image, img, cv::COLOR_BGR2GRAY);
-        threshold(img, img, 100, 255, cv::THRESH_BINARY);
+        cvtColor(src_image, clean_image, cv::COLOR_BGR2GRAY);
+        threshold(clean_image, clean_image, 100, 255, cv::THRESH_BINARY);
     } else {
-        threshold(src_image, img, 100, 255, cv::THRESH_BINARY);
+        threshold(src_image, clean_image, 100, 255, cv::THRESH_BINARY);
     }
+    return clean_image;
+}
+
+static vector<float> calculateImageFeatures(Mat source_image) {
+    Mat clean_image = cleanSourceImage(source_image);
 
     vector<float> image_features;
 
-    resize(img, img, Size(40, 40));
-    int h = img.rows / 4;
-    int w = img.cols / 4;
-    int S = colorPixelsAmount(img);
-    int T = img.cols * img.rows;
-    for (int i = 0; i < img.rows; i += h) {
-        for (int j = 0; j < img.cols; j += w) {
-            Mat cell = img(Rect(i, j, h, w));
+    resize(clean_image, clean_image, Size(40, 40));
+    int img_height = clean_image.rows / 4;
+    int img_width = clean_image.cols / 4;
+    int S = colorPixelsAmount(clean_image);
+    int T = clean_image.cols * clean_image.rows;
+    for (int i = 0; i < clean_image.rows; i += img_height) {
+        for (int j = 0; j < clean_image.cols; j += img_width) {
+            Mat cell = clean_image(Rect(i, j, img_height, img_width));
             int s = colorPixelsAmount(cell);
             float f = (float) s / S;
             image_features.push_back(f);

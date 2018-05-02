@@ -21,18 +21,19 @@ char detectCharFromImage(Mat char_image) {
     //Load SVM training file OpenCV 3.1
     Ptr <SVM> svmNew = SVM::create();
     svmNew = SVM::load("svm.txt");
-    char c = '*';
 
-    vector<float> feature = calculateImageFeatures(char_image);
+
+    vector<float> image_features = calculateImageFeatures(char_image);
     // Open CV3.1
     Mat m = Mat(1, number_of_feature, CV_32FC1);
-    for (size_t i = 0; i < feature.size(); ++i) {
-        float temp = feature[i];
+    for (size_t i = 0; i < image_features.size(); ++i) {
+        float temp = image_features[i];
         m.at<float>(0, i) = temp;
     }
 
     int ri = int(svmNew->predict(m)); // Open CV 3.1
-    /*int ri = int(svmNew.predict(m));*/
+
+    char c = '*';
     if (ri >= 0 && ri <= 9)
         c = (char) (ri + 48); //ma ascii 0 = 48
     if (ri >= 10 && ri < 18)
