@@ -30,11 +30,11 @@ static int colorPixelsAmount(Mat img, bool black_pixel = true) {
 
 Mat cleanSourceImage(Mat source_image) {
     Mat clean_image;
-    if (src_image.channels() == 3) {
-        cvtColor(src_image, clean_image, cv::COLOR_BGR2GRAY);
+    if (source_image.channels() == 3) {
+        cvtColor(source_image, clean_image, cv::COLOR_BGR2GRAY);
         threshold(clean_image, clean_image, 100, 255, cv::THRESH_BINARY);
     } else {
-        threshold(src_image, clean_image, 100, 255, cv::THRESH_BINARY);
+        threshold(source_image, clean_image, 100, 255, cv::THRESH_BINARY);
     }
     return clean_image;
 }

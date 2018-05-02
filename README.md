@@ -27,8 +27,11 @@ Then run
 > $ g++ RecogSVM.cpp $(pkg-config --cflags --libs opencv) -o RecogSVM
 
 Then simply run
-> $ ./RecogSVM "./samples/<image_name>"
+> $ ./RecogSVM ./samples/<image_name>
 
 
 ## To copy files into the container
 > docker cp <path_to_local_file> <container_id>:<path_to_destination>
+
+
+http://www.biobiochile.cl/noticias/2014/01/31/nuevas-placas-patentes-tienen-tipografia-renovada-y-mayores-medidas-de-seguridad.shtml

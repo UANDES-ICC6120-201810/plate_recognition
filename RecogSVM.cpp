@@ -15,7 +15,13 @@ const int LICENSE_PLATE_CHARS = 6;
 const double LICENSE_PLATE_WIDTH = 36;
 const double LICENSE_PLATE_HEIGHT = 13;
 const double LICENSE_PLATE_RATIO = LICENSE_PLATE_WIDTH / LICENSE_PLATE_HEIGHT;
+const double LICENSE_PLATE_RATIO_MARGIN = 0.5;
 
+const double MIN_PLATE_CHAR_WIDTH = 5;
+const double MIN_PLATE_CHAR_HEIGHT_PERCENTAGE = 0.5;  // Min char height compared to the plate height in %
+
+const double MIN_VALID_PIXEL_RATIO = 0.2;
+const double MAX_VALID_PIXEL_RATIO = 0.7;
 
 char detectCharFromImage(Mat char_image) {
     //Load SVM training file OpenCV 3.1
@@ -52,13 +58,16 @@ char detectCharFromImage(Mat char_image) {
 }
 
 bool invalidPlateDimensions(Mat source_image, Rect plate_rect) {
+    double plate_rect_ratio = (double) plate_rect.width / plate_rect.height;
+
+    cout << "TODO: Check conditions" << endl;
 
     return plate_rect.width > source_image.cols / 2
            || plate_rect.height > source_image.cols / 2
            || plate_rect.width < 120
            || plate_rect.height < 20
-           || (double) plate_rect.width / plate_rect.height > LICENSE_PLATE_RATIO + 0.5
-           || (double) plate_rect.width / plate_rect.height < LICENSE_PLATE_RATIO - 0.5;
+           || plate_rect_ratio > LICENSE_PLATE_RATIO + LICENSE_PLATE_RATIO_MARGIN
+           || plate_rect_ratio < LICENSE_PLATE_RATIO - LICENSE_PLATE_RATIO_MARGIN;
 }
 
 vector< vector<cv::Point> > getPotentialPlatesCharsContours(Mat plate_image) {
@@ -76,14 +85,14 @@ vector< vector<cv::Point> > getPotentialPlatesCharsContours(Mat plate_image) {
 }
 
 bool validPlateCharDimensions(Rect plate_rect, Rect sub_r) {
-    return sub_r.height > plate_rect.height / 2
+    return sub_r.height > plate_rect.height * MIN_PLATE_CHAR_HEIGHT_PERCENTAGE
            && sub_r.width < plate_rect.width / (LICENSE_PLATE_CHARS - 1)
-           && sub_r.width > 5
-           && plate_rect.width > 15;
+           && sub_r.width > MIN_PLATE_CHAR_WIDTH;
 }
 
+// Checks whether a pixel_ratio represents a char or not
 bool validPixelRatio(double pixel_ratio) {
-    return 0.2 < pixel_ratio && pixel_ratio < 0.7;
+    return MIN_VALID_PIXEL_RATIO < pixel_ratio && pixel_ratio < MAX_VALID_PIXEL_RATIO;
 }
 
 bool imageShouldBeChar(Mat plate_char_image) {
