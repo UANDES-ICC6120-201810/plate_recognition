@@ -9,7 +9,6 @@
 using namespace cv;
 using namespace std;
 using namespace cv::ml;
-Mat srcImg;
 
 const int CLASSES_AMOUNT = 30;
 const int CLASS_SAMPLES_AMOUNT = 10;

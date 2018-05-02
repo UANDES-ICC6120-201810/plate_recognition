@@ -9,45 +9,21 @@
 using namespace cv;
 using namespace std;
 using namespace cv::ml;
-Mat srcImg;
+
+const int LICENSE_PLATE_CHARS = 6;
+
+const double LICENSE_PLATE_WIDTH = 36;
+const double LICENSE_PLATE_HEIGHT = 13;
+const double LICENSE_PLATE_RATIO = LICENSE_PLATE_WIDTH / LICENSE_PLATE_HEIGHT;
 
 
-vector<string> getClassesFoldersPaths(string path) {
-    vector<string> folders;
-    DIR *dir = opendir(path.c_str());
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if ((strcmp(entry->d_name, ".") != 0) && (strcmp(entry->d_name, "..") != 0)) {
-            string folder_path = path + "/" + string(entry->d_name);
-            folders.push_back(folder_path);
-        }
-    }
-    closedir(dir);
-    return folders;
-
-}
-
-vector<string> getClassSamplePath(string folder_path) {
-    vector<string> files;
-    DIR *dir = opendir(folder_path.c_str());
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if ((strcmp(entry->d_name, ".") != 0) && (strcmp(entry->d_name, "..") != 0)) {
-            string file_path = folder_path + "/" + string(entry->d_name);
-            files.push_back(file_path);
-        }
-    }
-    closedir(dir);
-    return files;
-}
-
-char character_recognition(Mat img_character) {
+char detectCharFromImage(Mat char_image) {
     //Load SVM training file OpenCV 3.1
     Ptr <SVM> svmNew = SVM::create();
     svmNew = SVM::load("svm.txt");
     char c = '*';
 
-    vector<float> feature = calculateImageFeatures(img_character);
+    vector<float> feature = calculateImageFeatures(char_image);
     // Open CV3.1
     Mat m = Mat(1, number_of_feature, CV_32FC1);
     for (size_t i = 0; i < feature.size(); ++i) {
@@ -74,94 +50,167 @@ char character_recognition(Mat img_character) {
 
 }
 
-string SVMPredict() {
-    string licenseRecog;
-    vector<Mat> plates;
-    vector<Mat> draw_character;
-    vector<vector<Mat> > characters;
-    vector<string> text_recognition;
-    vector<double> process_time;
-    void sort_character(vector<Mat> &);
-    Mat image = srcImg;
-    Mat gray, binary;
-    vector<vector<cv::Point> > contours;
+bool invalidPlateDimensions(Mat source_image, Rect plate_rect) {
+
+    return plate_rect.width > source_image.cols / 2
+           || plate_rect.height > source_image.cols / 2
+           || plate_rect.width < 120
+           || plate_rect.height < 20
+           || (double) plate_rect.width / plate_rect.height > LICENSE_PLATE_RATIO + 0.5
+           || (double) plate_rect.width / plate_rect.height < LICENSE_PLATE_RATIO - 0.5;
+}
+
+vector< vector<cv::Point> > getPotentialPlatesCharsContours(Mat plate_image) {
+    // Required by the function cv::findContours but unused
+    //     Gets modified, so we make a copy to keep the original plate_image
+    Mat unused_img = plate_image.clone();
+
+    // Required by the function cv::findContours but unused
+    vector<Vec4i> unused_hierarchy;
+
+    vector< vector<cv::Point> > potential_plate_chars_contours;
+    cv::findContours(unused_img, potential_plate_chars_contours, unused_hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+
+    return potential_plate_chars_contours;
+}
+
+bool validPlateCharDimensions(Rect plate_rect, Rect sub_r) {
+    return sub_r.height > plate_rect.height / 2
+           && sub_r.width < plate_rect.width / (LICENSE_PLATE_CHARS - 1)
+           && sub_r.width > 5
+           && plate_rect.width > 15;
+}
+
+bool validPixelRatio(double pixel_ratio) {
+    return 0.2 < pixel_ratio && pixel_ratio < 0.7;
+}
+
+bool imageShouldBeChar(Mat plate_char_image) {
+    double black_pixels_ratio = (double) colorPixelsAmount(plate_char_image) / (plate_char_image.cols * plate_char_image.rows);
+    return validPixelRatio(black_pixels_ratio);
+}
+
+vector<Rect> getDetectedPlateChars(Rect plate_rect, Mat plate_image, vector<vector<cv::Point> > potential_plate_chars_contours) {
+    vector<Rect> detected_plate_chars;
+    int potential_plate_chars_amount = potential_plate_chars_contours.size();
+
+    for (size_t char_index = 0; char_index < potential_plate_chars_amount; char_index++) {
+        Rect plate_char_rect = cv::boundingRect(potential_plate_chars_contours.at(char_index));
+
+        if (validPlateCharDimensions(plate_rect, plate_char_rect) ) {
+            Mat plate_char_image = plate_image(plate_char_rect);
+
+            if ( imageShouldBeChar(plate_char_image) ) {
+                detected_plate_chars.push_back(plate_char_rect);
+            }
+        }
+    }
+    return detected_plate_chars;
+}
+
+vector<Rect> sortPlateCharsByX(vector<Rect> detected_plate_chars) {
+    int detected_plate_chars_amount = detected_plate_chars.size();
+
+    for (int i = 0; i < detected_plate_chars_amount - 1; i++) {
+        for (int j = i + 1; j < detected_plate_chars_amount; j++) {
+
+            if (detected_plate_chars.at(j).x < detected_plate_chars.at(i).x) {
+                Rect temp = detected_plate_chars.at(j);
+                detected_plate_chars.at(j) = detected_plate_chars.at(i);
+                detected_plate_chars.at(i) = temp;
+            }
+        }
+    }
+
+    return detected_plate_chars;
+}
+
+vector<Mat> getCharImages(Mat plate_image, vector<Rect> detected_plate_chars) {
+    vector<Mat> detected_plate_char_images;
+    for (int char_index = 0; char_index < detected_plate_chars.size(); char_index++) {
+        Mat plate_char_image = plate_image(detected_plate_chars.at(char_index));
+        detected_plate_char_images.push_back(plate_char_image);
+    }
+    return detected_plate_char_images;
+}
+
+vector< vector<Mat> > getDetectedPlates(Mat original_binary_src_img, vector< vector<cv::Point> > potential_plates_contours) {
+    vector< vector<Mat> > detected_plates;
+
+    for (size_t contour_index = 0; contour_index < potential_plates_contours.size(); contour_index++) {
+        Rect plate_rect = cv::boundingRect(potential_plates_contours.at(contour_index));
+
+        if (invalidPlateDimensions(original_binary_src_img, plate_rect)) continue;
+
+        Mat plate_image = original_binary_src_img(plate_rect);
+
+        vector< vector<cv::Point> > potential_plate_chars_contours = getPotentialPlatesCharsContours(plate_image);
+
+        bool notEnoughPotentialCharsDetected = potential_plate_chars_contours.size() < LICENSE_PLATE_CHARS + 1;
+        if (notEnoughPotentialCharsDetected) continue;
+
+        vector<Rect> detected_plate_chars = getDetectedPlateChars(plate_rect, plate_image, potential_plate_chars_contours);
+
+        bool notEnoughCharsDetected = detected_plate_chars.size() < LICENSE_PLATE_CHARS;
+        if (notEnoughCharsDetected) continue;
+
+        vector<Rect> sorted_plate_chars = sortPlateCharsByX(detected_plate_chars);
+
+        vector<Mat> detected_plate_char_images = getCharImages(plate_image, sorted_plate_chars);
+
+        detected_plates.push_back(detected_plate_char_images);
+    }
+    return detected_plates;
+}
+
+string plateCharsToString(vector<Mat> detected_plate) {
+    string licence_text;
+    for (size_t char_index = 0; char_index < detected_plate.size(); ++char_index) {
+        char plate_char = detectCharFromImage(detected_plate.at(char_index));
+        licence_text.push_back(plate_char);
+    }
+    return licence_text;
+}
+
+Mat sourceImageToBinary(Mat source_image) {
+    Mat gray_source_image;
+    cv::cvtColor(source_image, gray_source_image, cv::COLOR_BGR2GRAY);
+
+    Mat binary_src_img;
+    cv::adaptiveThreshold(gray_source_image, binary_src_img, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 55, 5);
+
+    return binary_src_img;
+}
+
+vector< vector<cv::Point> > getPotentialPlatesContours(Mat original_binary_src_img) {
+    Mat binary_src_img = original_binary_src_img.clone();
+    Mat element = cv::getStructuringElement(MORPH_RECT, cv::Size(3, 3));
+    cv::erode(binary_src_img, binary_src_img, element);
+    cv::dilate(binary_src_img, binary_src_img, element);
+
+    vector< vector<cv::Point> > potential_plates_contours;
     vector<Vec4i> hierarchy;
-    double t = (double) cv::getTickCount();
-    cvtColor(image, gray, cv::COLOR_BGR2GRAY);
-    //imshow("gray", gray);
-    adaptiveThreshold(gray, binary, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 55, 5);
-    //imshow("binary",binary);
-    Mat or_binary = binary.clone();
-    Mat element = getStructuringElement(MORPH_RECT, cv::Size(3, 3));
-    erode(binary, binary, element);
-    dilate(binary, binary, element);
-    findContours(binary, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
-    if (contours.size() <= 0) return "";
-    for (size_t i = 0; i < contours.size(); ++i) {
-        Rect r = boundingRect(contours.at(i));
-        if (r.width > image.cols / 2 || r.height > image.cols / 2 || r.width < 120 || r.height < 20
-            || (double) r.width / r.height > 4.5 || (double) r.width / r.height < 3.5)
-            continue;
-        Mat sub_binary = or_binary(r);
-        Mat _plate = sub_binary.clone();
-        vector<vector<cv::Point> > sub_contours;
-        vector<Vec4i> sub_hierarchy;
-        findContours(sub_binary, sub_contours, sub_hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
-        if (sub_contours.size() < 8) continue;
-        int count = 0;
-        vector<Mat> c;
-        Mat sub_image = image(r);
-        vector<Rect> r_characters;
-        for (size_t j = 0; j < sub_contours.size(); ++j) {
-            Rect sub_r = boundingRect(sub_contours.at(j));
-            if (sub_r.height > r.height / 2 && sub_r.width < r.width / 8 && sub_r.width > 5 && r.width > 15 &&
-                sub_r.x > 5) {
-                Mat cj = _plate(sub_r);
-                double ratio = (double) count_pixel(cj) / (cj.cols * cj.rows);
-                if (ratio > 0.2 && ratio < 0.7) {
-                    r_characters.push_back(sub_r);
-                    rectangle(sub_image, sub_r, Scalar(0, 0, 255), 2, 8, 0);
-                }
-            }
-        }
-        if (r_characters.size() >= 7) {
-            // sap xep
-            for (int i = 0; i < r_characters.size() - 1; ++i) {
-                for (int j = i + 1; j < r_characters.size(); ++j) {
-                    Rect temp;
-                    if (r_characters.at(j).x < r_characters.at(i).x) {
-                        temp = r_characters.at(j);
-                        r_characters.at(j) = r_characters.at(i);
-                        r_characters.at(i) = temp;
-                    }
-                }
-            }
-            for (int i = 0; i < r_characters.size(); ++i) {
-                Mat cj = _plate(r_characters.at(i));
-                c.push_back(cj);
-            }
-            characters.push_back(c);
-            sub_binary = or_binary(r);
-            plates.push_back(_plate);
-            draw_character.push_back(sub_image);
-        }
-        rectangle(image, r, Scalar(0, 255, 0), 2, 8, 0);
-    }
-    // imshow("place",image);
-    // imshow("char", draw_character[0]);
-    // Plate recoginatinon
-    for (size_t i = 0; i < characters.size(); i++) {
-        string result;
-        for (size_t j = 0; j < characters.at(i).size(); ++j) {
+    cv::findContours(binary_src_img, potential_plates_contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
-            char cs = character_recognition(characters.at(i).at(j));
-            result.push_back(cs);
+    return potential_plates_contours;
+}
 
-        }
-        text_recognition.push_back(result);
-        licenseRecog += result;
+string SVMPredict(Mat source_image) {
+    Mat original_binary_src_img = sourceImageToBinary(source_image);
+
+    vector< vector<cv::Point> > potential_plates_contours = getPotentialPlatesContours(original_binary_src_img);
+
+    if (potential_plates_contours.size() <= 0) return "";
+
+    vector< vector<Mat> > detected_plates = getDetectedPlates(original_binary_src_img, potential_plates_contours);
+
+    // Plate recognition
+    string licence_text;
+    for (size_t plate_index = 0; plate_index < detected_plates.size(); plate_index++) {
+        string result = plateCharsToString(detected_plates.at(plate_index));
+        licence_text += result;
     }
-    return licenseRecog;
+    return licence_text;
 }
 
 
@@ -171,11 +220,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    srcImg = imread(argv[1]);
-    cout << " Car License Deteceted Number: " << SVMPredict() << endl;
-    waitKey(0);
-    cout << "Press any key to exit." << endl;
-    getwchar();
-    return 0;
+    Mat source_image = imread(argv[1]);
 
+    string licence_text = SVMPredict(source_image);
+
+    cout << licence_text << endl;
+
+    return 0;
 }

@@ -11,7 +11,7 @@ using namespace cv;
 
 const int number_of_feature = 32;
 
-static int count_pixel(Mat img, bool black_pixel = true) {
+static int colorPixelsAmount(Mat img, bool black_pixel = true) {
     int black = 0;
     int white = 0;
 
@@ -42,12 +42,12 @@ static vector<float> calculateImageFeatures(Mat src_image) {
     resize(img, img, Size(40, 40));
     int h = img.rows / 4;
     int w = img.cols / 4;
-    int S = count_pixel(img);
+    int S = colorPixelsAmount(img);
     int T = img.cols * img.rows;
     for (int i = 0; i < img.rows; i += h) {
         for (int j = 0; j < img.cols; j += w) {
             Mat cell = img(Rect(i, j, h, w));
-            int s = count_pixel(cell);
+            int s = colorPixelsAmount(cell);
             float f = (float) s / S;
             image_features.push_back(f);
         }
