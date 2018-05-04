@@ -1,17 +1,15 @@
-#ifndef FEATURE_H
-#define FEATURE_H
+#ifndef ALPR_SVMCHARDETECTOR_H
+#define ALPR_SVMCHARDETECTOR_H
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
-#include "dirent.h"
 
-using namespace std;
-using namespace cv;
+#include <opencv2/core/mat.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/ml.hpp>
 
-const int number_of_feature = 32;
+#include "Constants.hpp"
 
-static int colorPixelsAmount(Mat img, bool black_pixel = true) {
+static int colorPixelsAmount2(cv::Mat img, bool black_pixel = true) {
     int black = 0;
     int white = 0;
 
@@ -28,31 +26,31 @@ static int colorPixelsAmount(Mat img, bool black_pixel = true) {
         return white;
 }
 
-Mat cleanSourceImage(Mat source_image) {
-    Mat clean_image;
+cv::Mat cleanSourceImage(cv::Mat source_image) {
+    cv::Mat clean_image;
     if (source_image.channels() == 3) {
-        cvtColor(source_image, clean_image, cv::COLOR_BGR2GRAY);
-        threshold(clean_image, clean_image, 100, 255, cv::THRESH_BINARY);
+        cv::cvtColor(source_image, clean_image, cv::COLOR_BGR2GRAY);
+        cv::threshold(clean_image, clean_image, 100, 255, cv::THRESH_BINARY);
     } else {
-        threshold(source_image, clean_image, 100, 255, cv::THRESH_BINARY);
+        cv::threshold(source_image, clean_image, 100, 255, cv::THRESH_BINARY);
     }
     return clean_image;
 }
 
-static vector<float> calculateImageFeatures(Mat source_image) {
-    Mat clean_image = cleanSourceImage(source_image);
+static vector<float> calculateImageFeatures(cv::Mat source_image) {
+    cv::Mat clean_image = cleanSourceImage(source_image);
 
     vector<float> image_features;
 
-    resize(clean_image, clean_image, Size(40, 40));
+    cv::resize(clean_image, clean_image, cv::Size(40, 40));
     int img_height = clean_image.rows / 4;
     int img_width = clean_image.cols / 4;
-    int S = colorPixelsAmount(clean_image);
+    int S = colorPixelsAmount2(clean_image);
     int T = clean_image.cols * clean_image.rows;
     for (int i = 0; i < clean_image.rows; i += img_height) {
         for (int j = 0; j < clean_image.cols; j += img_width) {
-            Mat cell = clean_image(Rect(i, j, img_height, img_width));
-            int s = colorPixelsAmount(cell);
+            cv::Mat cell = clean_image(cv::Rect(i, j, img_height, img_width));
+            int s = colorPixelsAmount2(cell);
             float f = (float) s / S;
             image_features.push_back(f);
         }
@@ -80,5 +78,37 @@ static vector<float> calculateImageFeatures(Mat source_image) {
     return image_features; //32 feature
 }
 
+char detectCharFromImage(cv::Mat char_image) {
+    //Load SVM training file OpenCV 3.1
+    cv::Ptr< cv::ml::SVM > svmNew = cv::ml::SVM::create();
+    svmNew = cv::ml::SVM::load(SVM_TRAINED_DATA_PATH);
+
+
+    vector<float> image_features = calculateImageFeatures(char_image);
+    // Open CV3.1
+    cv::Mat m = cv::Mat(1, SVM_FEATURES_AMOUNT, CV_32FC1);
+    for (size_t i = 0; i < image_features.size(); ++i) {
+        float temp = image_features[i];
+        m.at<float>(0, i) = temp;
+    }
+
+    int ri = int(svmNew->predict(m)); // Open CV 3.1
+
+    char c = '*';
+    if (ri >= 0 && ri <= 9)
+        c = (char) (ri + 48); //ma ascii 0 = 48
+    if (ri >= 10 && ri < 18)
+        c = (char) (ri + 55); //ma accii A = 5, --> tu A-H
+    if (ri >= 18 && ri < 22)
+        c = (char) (ri + 55 + 2); //K-N, bo I,J
+    if (ri == 22) c = 'P';
+    if (ri == 23) c = 'S';
+    if (ri >= 24 && ri < 27)
+        c = (char) (ri + 60); //T-V,
+    if (ri >= 27 && ri < 30)
+        c = (char) (ri + 61); //X-Z
+
+    return c;
+}
 
 #endif

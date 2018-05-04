@@ -1,18 +1,17 @@
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/core/core.hpp"
-#include "opencv2/ml.hpp"
-#include "dirent.h"
-#include "feature.h"
 #include <iostream>
+#include <dirent.h>
 
-using namespace cv;
+#include <opencv2/core/mat.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/ml.hpp>
+
+#include "core/Constants.hpp"
+#include "core/SVMCharDetector.hpp"
+
+
 using namespace std;
-using namespace cv::ml;
 
-const int CLASSES_AMOUNT = 30;
-const int CLASS_SAMPLES_AMOUNT = 10;
-const int FEATURES_AMOUNT = 32;
 
 vector<string> getClassesFoldersPaths(string training_set_path) {
     vector<string> folders;
@@ -46,28 +45,28 @@ vector<string> getClassSamplePath(string class_folder_path) {
 bool TrainSVM(string training_set_path, string trained_svm_path) {
     if (CLASS_SAMPLES_AMOUNT <= 0 || CLASSES_AMOUNT <= 0) return false;
 
-    //Train SVM OpenCV 3.1+
-    Ptr <SVM> svm = SVM::create();
-    svm->setType(SVM::C_SVC);
-    svm->setKernel(SVM::LINEAR);
+    //Train cv::ml::SVM OpenCV 3.1+
+    cv::Ptr <cv::ml::SVM> svm = cv::ml::SVM::create();
+    svm->setType(cv::ml::SVM::C_SVC);
+    svm->setKernel(cv::ml::SVM::LINEAR);
     svm->setGamma(0.5);
     svm->setC(16);
-    svm->setTermCriteria(TermCriteria(TermCriteria::MAX_ITER, 100, 1e-6));
+    svm->setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 100, 1e-6));
 
     vector<string> trainingFoldersPaths = getClassesFoldersPaths(training_set_path);
     int total_class_folders = (int)trainingFoldersPaths.size();
 
     if (total_class_folders <= 0) {
-        cout << "Missing training classes folders under" << training_set_path << endl;
+        cout << "Missing training classes folders under " << training_set_path << endl;
         return false;
     }
     if (total_class_folders != CLASSES_AMOUNT) {
-        cout << "Missing training class folders under" << training_set_path << "should be" << CLASSES_AMOUNT << endl;
+        cout << "Training class folders under " << training_set_path << " should be " << CLASSES_AMOUNT << endl;
         return false;
     }
 
-    Mat samples_matrix = Mat(CLASSES_AMOUNT * CLASS_SAMPLES_AMOUNT, FEATURES_AMOUNT, CV_32FC1);
-    Mat responses_matrix = Mat(CLASSES_AMOUNT * CLASS_SAMPLES_AMOUNT, 1, CV_32SC1);
+    cv::Mat samples_matrix = cv::Mat(CLASSES_AMOUNT * CLASS_SAMPLES_AMOUNT, SVM_FEATURES_AMOUNT, CV_32FC1);
+    cv::Mat responses_matrix = cv::Mat(CLASSES_AMOUNT * CLASS_SAMPLES_AMOUNT, 1, CV_32SC1);
 
     int sample_index = 0;
     std::sort(trainingFoldersPaths.begin(), trainingFoldersPaths.end());
@@ -90,7 +89,7 @@ bool TrainSVM(string training_set_path, string trained_svm_path) {
         string label_folder = class_folder_path.substr(class_folder_path.length() - 1);
 
         for (size_t j = 0; j < total_class_samples; ++j) {
-            Mat class_sample_image = imread(class_samples.at(j));
+            cv::Mat class_sample_image = cv::imread(class_samples.at(j));
 
             if (class_sample_image.empty()) {
                 return false;
@@ -106,7 +105,7 @@ bool TrainSVM(string training_set_path, string trained_svm_path) {
     }
 
     // SVM Train OpenCV 3.1+
-    svm->trainAuto(ml::TrainData::create(samples_matrix, ml::ROW_SAMPLE, responses_matrix));
+    svm->trainAuto(cv::ml::TrainData::create(samples_matrix, cv::ml::ROW_SAMPLE, responses_matrix));
     svm->save(trained_svm_path);
     return true;
 }
