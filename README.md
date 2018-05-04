@@ -16,11 +16,8 @@ $ ./SVMTrain
 ## In case unlinked library consider this
 https://stackoverflow.com/questions/12335848/opencv-program-compile-error-libopencv-core-so-2-4-cannot-open-shared-object-f
 
-Create file
-> $ echo '/usr/local/lib/' > /etc/ld.so.conf.d/opencv.conf
-
-Then run
-> $ ldconfig -v
+Run command
+> $ echo '/usr/local/lib/' > /etc/ld.so.conf.d/opencv.conf && ldconfig -v
 
 
 ## To compile RecogSVM.cpp
