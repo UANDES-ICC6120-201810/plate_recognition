@@ -1,6 +1,8 @@
 #ifndef ALPR_CONSTANTS_H
 #define ALPR_CONSTANTS_H
 
+#include <string>
+
 using namespace std;
 
 const string SVM_TRAINED_DATA_PATH = "svm.txt";
@@ -28,6 +30,11 @@ const double MIN_PLATE_RATIO = PLATE_RATIO * (1 - PLATE_RATIO_ERROR_RANGE);
 
 const double MIN_VALID_PIXEL_RATIO = 0.2;
 const double MAX_VALID_PIXEL_RATIO = 0.7;
+
+const int UPPER = 0;
+const int LOWER = 1;
+const int LEFT = 0;
+const int RIGHT = 1;
 
 
 #endif

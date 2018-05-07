@@ -6,6 +6,7 @@
 #include <opencv2/core/mat.hpp>
 
 #include "Constants.hpp"
+#include "debugger.hpp"
 
 
 using namespace std;
@@ -16,6 +17,9 @@ vector< cv::Mat > PlateFinder::findPlateImages(cv::Mat source_img) {
 
     vector< cv::Rect > potential_plate_contours = findPotentialPlateContours(binary_img);
     vector< cv::Rect > valid_plate_contours = removeInvalidPlateContours(potential_plate_contours);
+
+    debugWriteRecognizedPlates(source_img, valid_plate_contours);
+    debugWriteRecognizedPlates(binary_img, valid_plate_contours);
 
     return getPlateImages(binary_img, valid_plate_contours);
 }

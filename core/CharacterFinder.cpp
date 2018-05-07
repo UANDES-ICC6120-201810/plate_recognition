@@ -6,7 +6,7 @@
 #include <opencv2/core/mat.hpp>
 
 #include "Constants.hpp"
-#include "debugger.h"  // Remove later
+#include "debugger.hpp"  // Remove later
 #include "SVMCharDetector.hpp"
 
 vector< string > CharacterFinder::findPlatesText(vector< cv::Mat > plate_images) {
@@ -28,6 +28,12 @@ string CharacterFinder::findPlateText(cv::Mat plate_img) {
     cv::Rect plate_rect = cv::Rect(0, 0, plate_img.size().width, plate_img.size().height);
 
     vector< cv::Rect > valid_char_contours = removeInvalidCharContours(plate_img, potential_char_contours);
+
+    if (valid_char_contours.size() < PLATE_CHARS) {
+        cout << "Fall down to horizontal and vertical smearing" << endl;
+        valid_char_contours = getCharRects(plate_img);
+    };
+
     if (valid_char_contours.size() < PLATE_CHARS) return "";
 
     vector< cv::Rect > sorted_chars = sortPlateCharsByX(valid_char_contours);
@@ -124,6 +130,95 @@ double CharacterFinder::colorPixelsAmount(cv::Mat img, bool black_pixel) {
 // Checks whether a pixel_ratio represents a char or not
 bool CharacterFinder::validPixelRatio(double pixel_ratio) {
     return MIN_VALID_PIXEL_RATIO < pixel_ratio && pixel_ratio < MAX_VALID_PIXEL_RATIO;
+}
+
+vector< cv::Rect> CharacterFinder::getCharRects(cv::Mat binary_img) {
+    const int PLATE_CHARS_WITH_MARGIN = PLATE_CHARS + 4;
+    vector< cv::Rect > detected_chars;
+
+    cv::Rect horizontalCrop = getHorizontalCropPlateRect(binary_img);
+
+    if (!isValidCropRect(horizontalCrop)) return detected_chars;
+    cv::Mat cropped_img = binary_img(horizontalCrop);
+
+    int original_y_offset = horizontalCrop.y;
+
+    int left_px = -1;
+    int right_px = -1;
+    bool previous_was_empty = false;
+    int height = cropped_img.size().height;
+
+
+    for (int i = 0; i < cropped_img.cols; i++) {
+        double white_pixels = cv::countNonZero(cropped_img(cv::Rect(i, 0, 1, cropped_img.rows)));
+        double white_pixel_percentage = white_pixels / height;
+
+        bool is_empty = white_pixel_percentage > 0.95;
+
+        bool detected_left_px = left_px != -1;
+        bool detected_right_px = right_px != -1;
+
+        bool is_left_px = previous_was_empty && is_empty && !detected_right_px;
+        bool is_right_px = !previous_was_empty && is_empty && detected_left_px;
+
+        if (is_left_px) left_px = i + 1;
+        if (is_right_px) {
+            right_px = i - 1;
+            cv::Rect char_rect = getCharRect(left_px, right_px, height, original_y_offset);
+            detected_chars.push_back(char_rect);
+
+            left_px = -1;
+            right_px = -1;
+        }
+
+        previous_was_empty = is_empty;
+    }
+
+    return detected_chars;
+}
+
+bool CharacterFinder::isValidCropRect(cv::Rect horizontalCrop) {
+    return 0 < horizontalCrop.x
+           && 0 < horizontalCrop.y
+           && horizontalCrop.x < horizontalCrop.width
+           && horizontalCrop.y < horizontalCrop.height;
+}
+
+cv::Rect CharacterFinder::getCharRect(int left_margin, int right_margin, int image_height, int original_y_offset) {
+    int char_width = right_margin - left_margin;
+    return cv::Rect(left_margin, original_y_offset, char_width, image_height);
+}
+
+cv::Rect CharacterFinder::getHorizontalCropPlateRect(cv::Mat binary_img) {
+
+    int width = binary_img.size().width;
+
+    int upper_px = -1;
+    int lower_px = -1;
+
+    bool previous_was_empty = false;
+
+    for (int i = 0; i < binary_img.rows - 1; i++) {
+
+        double white_pixels = cv::countNonZero(binary_img(cv::Rect(0, i, binary_img.cols, 1)));
+        double white_pixel_percentage = white_pixels / width;
+
+        bool is_empty = white_pixel_percentage > 0.8;
+        bool detected_lower_px = lower_px != -1;
+        bool detected_upper_px = upper_px != -1;
+
+        bool is_upper_px = previous_was_empty && is_empty && !detected_lower_px;
+        bool is_lower_px = !previous_was_empty && is_empty && detected_upper_px;
+
+        if (is_upper_px) upper_px = i + 1;
+        if (is_lower_px) lower_px = i;
+
+        previous_was_empty = is_empty;
+    }
+
+    cv::Rect horizontalCrop = cv::Rect(0, upper_px, width, lower_px - upper_px);
+
+    return horizontalCrop;
 }
 
 
