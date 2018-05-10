@@ -8,7 +8,7 @@ a picture of a car.
 > f schrift font
 
 ## To compile SVMTrain.cpp
-> $ g++ SVMTrain.cpp $(pkg-config --libs opencv) -o SVMTrain
+> $ g++ TrainSVM.cpp $(pkg-config --libs opencv) -o TrainSVM
 
 Then simply run
 $ ./SVMTrain
@@ -21,7 +21,7 @@ Run command
 
 
 ## To compile RecogSVM.cpp
-> $ g++ RecogSVM.cpp $(pkg-config --cflags --libs opencv) -o RecogSVM
+> $ g++ MainALPR.cpp core/PlateFinder.cpp core/CharacterFinder.cpp core/SVMCharDetector.hpp core/Constants.hpp core/debugger.cpp $(pkg-config --libs opencv) -o main.out
 
 Then simply run
 > $ ./RecogSVM ./samples/<image_name>
