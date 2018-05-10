@@ -30,7 +30,6 @@ string CharacterFinder::findPlateText(cv::Mat plate_img) {
     vector< cv::Rect > valid_char_contours = removeInvalidCharContours(plate_img, potential_char_contours);
 
     if (valid_char_contours.size() < PLATE_CHARS) {
-        cout << "Fall down to horizontal and vertical smearing" << endl;
         valid_char_contours = getCharRects(plate_img);
     };
 
