@@ -7,7 +7,6 @@
 #include "core/plate_segmentation.hpp"
 #include "core/char_segmentation.hpp"
 #include "core/ocr_detector.hpp"
-#include "core/debugger.hpp"
 
 using namespace std;
 
