@@ -1,52 +1,41 @@
-#include "CharacterFinder.hpp"
+#include "char_segmentation.hpp"
 
 #include <vector>
-#include <iostream>  // Remove later
 
 #include <opencv2/core/mat.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include "Constants.hpp"
-#include "debugger.hpp"  // Remove later
-#include "SVMCharDetector.hpp"
 
-vector< string > CharacterFinder::findPlatesText(vector< cv::Mat > plate_images) {
-    vector< string > plates_text;
 
-    for (size_t index = 0; index < plate_images.size(); index++) {
-        string plate_text = findPlateText(plate_images.at(index));
+vector< cv::Mat > CharSegmentation::findPlateCharImages(cv::Mat plate_img) {
+    vector< cv::Rect > char_contours = findCharContours(plate_img);
+    vector< cv::Mat > char_images = getPlateCharImages(plate_img, char_contours);
 
-        if (plate_text.length() == PLATE_CHARS)
-            plates_text.push_back(plate_text);
-    }
-    return plates_text;
+    return char_images;
 }
 
 
-string CharacterFinder::findPlateText(cv::Mat plate_img) {
-    vector< cv::Rect > potential_char_contours = findPotentialCharContours(plate_img);
+vector< cv::Rect > CharSegmentation::findCharContours(cv::Mat plate_img) {
+    vector< cv::Rect > empty_contours;
 
-    cv::Rect plate_rect = cv::Rect(0, 0, plate_img.size().width, plate_img.size().height);
+    vector< cv::Rect > potential_contours = findPotentialCharContours(plate_img);
+    vector< cv::Rect > valid_contours = removeInvalidCharContours(plate_img, potential_contours);
 
-    vector< cv::Rect > valid_char_contours = removeInvalidCharContours(plate_img, potential_char_contours);
-
-    if (valid_char_contours.size() < PLATE_CHARS) {
-        valid_char_contours = getCharRects(plate_img);
+    if (valid_contours.size() < PLATE_CHARS) {
+        valid_contours = getCharRects(plate_img);
     };
 
-    if (valid_char_contours.size() < PLATE_CHARS) return "";
+    if (valid_contours.size() < PLATE_CHARS) return empty_contours;
 
-    vector< cv::Rect > sorted_chars = sortPlateCharsByX(valid_char_contours);
-    if (sorted_chars.size() < PLATE_CHARS) return "";
+    vector< cv::Rect > sorted_chars = sortPlateCharsByX(valid_contours);
+    if (sorted_chars.size() < PLATE_CHARS) return empty_contours;
 
-    debugWriteRecognizedChars(plate_img, sorted_chars);
-
-    vector< cv::Mat > char_images = getPlateCharImages(plate_img, sorted_chars);
-
-    return plateCharsToString(char_images);
+    return sorted_chars;
 }
 
 
-vector< cv::Rect > CharacterFinder::findPotentialCharContours(cv::Mat plate_img) {
+vector< cv::Rect > CharSegmentation::findPotentialCharContours(cv::Mat plate_img) {
     cv::Mat unused_img = plate_img.clone();
     vector< cv::Vec4i > unused_hierarchy;
 
@@ -57,7 +46,7 @@ vector< cv::Rect > CharacterFinder::findPotentialCharContours(cv::Mat plate_img)
 }
 
 
-vector< cv::Rect > CharacterFinder::transformContoursToRects(vector< vector< cv::Point > > char_contours) {
+vector< cv::Rect > CharSegmentation::transformContoursToRects(vector< vector< cv::Point > > char_contours) {
     vector< cv::Rect > plate_rects;
 
     for (size_t index = 0; index < char_contours.size(); index++) {
@@ -69,7 +58,7 @@ vector< cv::Rect > CharacterFinder::transformContoursToRects(vector< vector< cv:
 }
 
 
-vector< cv::Rect > CharacterFinder::removeInvalidCharContours(cv::Mat plate_img, vector< cv::Rect > char_contours) {
+vector< cv::Rect > CharSegmentation::removeInvalidCharContours(cv::Mat plate_img, vector< cv::Rect > char_contours) {
     vector< cv::Rect > valid_contours;
     size_t total_contours = char_contours.size();
 
@@ -88,7 +77,7 @@ vector< cv::Rect > CharacterFinder::removeInvalidCharContours(cv::Mat plate_img,
 }
 
 
-bool CharacterFinder::validPlateCharDimensions(cv::Mat plate_img, cv::Rect char_rect) {
+bool CharSegmentation::validPlateCharDimensions(cv::Mat plate_img, cv::Rect char_rect) {
     double min_char_height = plate_img.size().height * MIN_PLATE_CHAR_HEIGHT_PERCENTAGE;
     double max_char_width = plate_img.size().width / (PLATE_CHARS - 1);
 
@@ -98,7 +87,7 @@ bool CharacterFinder::validPlateCharDimensions(cv::Mat plate_img, cv::Rect char_
 }
 
 
-bool CharacterFinder::validCharImage(cv::Mat char_img) {
+bool CharSegmentation::validCharImage(cv::Mat char_img) {
     bool check_black_pixels = true;
     double black_pixels_amount = colorPixelsAmount(char_img, check_black_pixels);
     int total_pixels = char_img.cols * char_img.rows;
@@ -109,7 +98,7 @@ bool CharacterFinder::validCharImage(cv::Mat char_img) {
 }
 
 
-double CharacterFinder::colorPixelsAmount(cv::Mat img, bool black_pixel) {
+double CharSegmentation::colorPixelsAmount(cv::Mat img, bool black_pixel) {
     double black = 0;
     double white = 0;
 
@@ -127,11 +116,11 @@ double CharacterFinder::colorPixelsAmount(cv::Mat img, bool black_pixel) {
 }
 
 // Checks whether a pixel_ratio represents a char or not
-bool CharacterFinder::validPixelRatio(double pixel_ratio) {
+bool CharSegmentation::validPixelRatio(double pixel_ratio) {
     return MIN_VALID_PIXEL_RATIO < pixel_ratio && pixel_ratio < MAX_VALID_PIXEL_RATIO;
 }
 
-vector< cv::Rect> CharacterFinder::getCharRects(cv::Mat binary_img) {
+vector< cv::Rect> CharSegmentation::getCharRects(cv::Mat binary_img) {
     const int PLATE_CHARS_WITH_MARGIN = PLATE_CHARS + 4;
     vector< cv::Rect > detected_chars;
 
@@ -176,19 +165,19 @@ vector< cv::Rect> CharacterFinder::getCharRects(cv::Mat binary_img) {
     return detected_chars;
 }
 
-bool CharacterFinder::isValidCropRect(cv::Rect horizontalCrop) {
+bool CharSegmentation::isValidCropRect(cv::Rect horizontalCrop) {
     return 0 < horizontalCrop.x
            && 0 < horizontalCrop.y
            && horizontalCrop.x < horizontalCrop.width
            && horizontalCrop.y < horizontalCrop.height;
 }
 
-cv::Rect CharacterFinder::getCharRect(int left_margin, int right_margin, int image_height, int original_y_offset) {
+cv::Rect CharSegmentation::getCharRect(int left_margin, int right_margin, int image_height, int original_y_offset) {
     int char_width = right_margin - left_margin;
     return cv::Rect(left_margin, original_y_offset, char_width, image_height);
 }
 
-cv::Rect CharacterFinder::getHorizontalCropPlateRect(cv::Mat binary_img) {
+cv::Rect CharSegmentation::getHorizontalCropPlateRect(cv::Mat binary_img) {
 
     int width = binary_img.size().width;
 
@@ -221,7 +210,7 @@ cv::Rect CharacterFinder::getHorizontalCropPlateRect(cv::Mat binary_img) {
 }
 
 
-vector<cv::Rect> CharacterFinder::sortPlateCharsByX(vector< cv::Rect > plate_chars) {
+vector<cv::Rect> CharSegmentation::sortPlateCharsByX(vector< cv::Rect > plate_chars) {
     int detected_plate_chars_amount = plate_chars.size();
 
     for (int i = 0; i < detected_plate_chars_amount - 1; i++) {
@@ -239,7 +228,7 @@ vector<cv::Rect> CharacterFinder::sortPlateCharsByX(vector< cv::Rect > plate_cha
 }
 
 
-vector< cv::Mat > CharacterFinder::getPlateCharImages(cv::Mat plate_img, vector< cv::Rect > char_contours) {
+vector< cv::Mat > CharSegmentation::getPlateCharImages(cv::Mat plate_img, vector< cv::Rect > char_contours) {
     vector< cv::Mat > char_images;
 
     for (size_t index = 0; index < char_contours.size(); index++) {
@@ -252,18 +241,6 @@ vector< cv::Mat > CharacterFinder::getPlateCharImages(cv::Mat plate_img, vector<
 }
 
 
-cv::Mat CharacterFinder::getCharImage(cv::Mat plate_img, cv::Rect char_contour) {
+cv::Mat CharSegmentation::getCharImage(cv::Mat plate_img, cv::Rect char_contour) {
     return plate_img(char_contour);
-}
-
-
-string CharacterFinder::plateCharsToString(vector< cv::Mat > char_images) {
-    string licence_text = "";
-
-    for (size_t index = 0; index < char_images.size(); index++) {
-        char plate_char = detectCharFromImage(char_images.at(index));
-        licence_text += plate_char;
-    }
-
-    return licence_text;
 }

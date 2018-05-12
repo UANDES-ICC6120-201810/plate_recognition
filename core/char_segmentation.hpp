@@ -1,5 +1,5 @@
-#ifndef ALPR_CHARACTERFINDER_H
-#define ALPR_CHARACTERFINDER_H
+#ifndef CHAR_SEGMENTATION_H
+#define CHAR_SEGMENTATION_H
 
 #include <vector>
 
@@ -9,12 +9,12 @@
 using namespace std;
 
 
-class CharacterFinder {
+class CharSegmentation {
 public:
-    vector< string > findPlatesText(vector< cv::Mat > plate_images);
-    string findPlateText(cv::Mat plate_img);
+    vector< cv::Mat > findPlateCharImages(cv::Mat plate_img);
 
 private:
+    vector< cv::Rect > findCharContours(cv::Mat plate_img);
     vector< cv::Rect > findPotentialCharContours(cv::Mat plate_img);
     vector< cv::Rect > transformContoursToRects(vector< vector< cv::Point > > char_contours);
     vector< cv::Rect > removeInvalidCharContours(cv::Mat plate_image, vector< cv::Rect > potential_char_contours);
@@ -29,7 +29,6 @@ private:
     vector< cv::Rect > sortPlateCharsByX(vector< cv::Rect > plate_chars);
     vector< cv::Mat > getPlateCharImages(cv::Mat plate_img, vector< cv::Rect > char_contours);
     cv::Mat getCharImage(cv::Mat plate_img, cv::Rect char_contour);
-    string plateCharsToString(vector< cv::Mat > char_images);
 };
 
 #endif

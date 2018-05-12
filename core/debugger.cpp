@@ -19,6 +19,18 @@ void debugWriteRecognizedPlate(cv::Mat source_img, cv::Rect plate_rect) {
     debugWriteImage(source_img, plate_rect, file_name);
 }
 
+void debugWriteRecognizedPlates(vector< cv::Mat > source_img) {
+    for (size_t index = 0; index < source_img.size(); index++) {
+        debugWriteRecognizedPlate(source_img.at(index));
+    }
+}
+
+void debugWriteRecognizedPlate(cv::Mat source_img) {
+    string file_name = "./out/plate_" + to_string(plate_file_name_counter++) + ".jpg";
+
+    debugWriteImage(source_img, file_name);
+}
+
 int char_file_name_counter = 0;
 
 void debugWriteRecognizedChars(cv::Mat source_img, vector< cv::Rect > char_images) {
@@ -33,6 +45,18 @@ void debugWriteRecognizedChar(cv::Mat source_img, cv::Rect plate_char_rect) {
     debugWriteImage(source_img, plate_char_rect, file_name);
 }
 
+void debugWriteRecognizedChars(vector< cv::Mat > source_img) {
+    for (size_t index = 0; index < source_img.size(); index++) {
+        debugWriteRecognizedChar(source_img.at(index));
+    }
+}
+
+void debugWriteRecognizedChar(cv::Mat source_img) {
+    string file_name = "./out/plate_char_" + to_string(char_file_name_counter++) + ".jpg";
+
+    debugWriteImage(source_img, file_name);
+}
+
 void debugWriteImage(cv::Mat source_img, cv::Rect trim_rect, string file_name) {
     cv::Mat trimmed_img = source_img(trim_rect);
 
@@ -41,4 +65,13 @@ void debugWriteImage(cv::Mat source_img, cv::Rect trim_rect, string file_name) {
     compression_params.push_back(100);
 
     cv::imwrite(file_name, trimmed_img, compression_params);
+}
+
+void debugWriteImage(cv::Mat source_img, string file_name) {
+
+    vector<int> compression_params;
+    compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
+    compression_params.push_back(100);
+
+    cv::imwrite(file_name, source_img, compression_params);
 }

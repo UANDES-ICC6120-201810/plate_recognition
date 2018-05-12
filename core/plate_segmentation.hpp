@@ -1,12 +1,12 @@
-#ifndef ALPR_PLATEFINDER_H
-#define ALPR_PLATEFINDER_H
+#ifndef PLATE_SEGMENTATION_H
+#define PLATE_SEGMENTATION_H
 
 #include <vector>
 #include "opencv2/core/mat.hpp"
 
 using namespace std;
 
-class PlateFinder {
+class PlateSegmentation {
     public:
         vector< cv::Mat > findPlateImages(cv::Mat source_img);
 

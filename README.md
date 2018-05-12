@@ -21,7 +21,7 @@ Run command
 
 
 ## To compile RecogSVM.cpp
-> $ g++ MainALPR.cpp core/PlateFinder.cpp core/CharacterFinder.cpp core/SVMCharDetector.hpp core/Constants.hpp core/debugger.cpp $(pkg-config --libs opencv) -o main.out
+> $ g++ MainALPR.cpp core/plate_segmentation.cpp core/char_segmentation.cpp core/ocr_detector.cpp core/SVMCharDetector.hpp core/Constants.hpp core/debugger.cpp $(pkg-config --libs opencv) -o main
 
 Then simply run
 > $ ./RecogSVM ./samples/<image_name>
@@ -29,6 +29,17 @@ Then simply run
 
 ## To copy files into the container
 > docker cp <path_to_local_file> <container_id>:<path_to_destination>
+
+# Testing
+For testing **Plates** run
+
+> $ g++ TestPlatesFromImage.cpp core/plate_segmentation.cpp core/debugger.cpp $(pkg-config --libs opencv) -o test-plates
+
+For testing **Chars** run
+
+> $ g++ TestCharsFromPlate.cpp core/char_segmentation.cpp core/debugger.cpp $(pkg-config --libs opencv) -o test-chars
+
+NOTE: Use binary images when testing plates
 
 
 http://www.biobiochile.cl/noticias/2014/01/31/nuevas-placas-patentes-tienen-tipografia-renovada-y-mayores-medidas-de-seguridad.shtml

@@ -1,4 +1,4 @@
-#include "PlateFinder.hpp"
+#include "plate_segmentation.hpp"
 
 #include <vector>
 
@@ -6,26 +6,22 @@
 #include <opencv2/core/mat.hpp>
 
 #include "Constants.hpp"
-#include "debugger.hpp"
 
 
 using namespace std;
 
 
-vector< cv::Mat > PlateFinder::findPlateImages(cv::Mat source_img) {
+vector< cv::Mat > PlateSegmentation::findPlateImages(cv::Mat source_img) {
     cv::Mat binary_img = sourceImageToBinary(source_img);
 
     vector< cv::Rect > potential_plate_contours = findPotentialPlateContours(binary_img);
     vector< cv::Rect > valid_plate_contours = removeInvalidPlateContours(potential_plate_contours);
 
-    debugWriteRecognizedPlates(source_img, valid_plate_contours);
-    debugWriteRecognizedPlates(binary_img, valid_plate_contours);
-
     return getPlateImages(binary_img, valid_plate_contours);
 }
 
 
-cv::Mat PlateFinder::sourceImageToBinary(cv::Mat source_image) {
+cv::Mat PlateSegmentation::sourceImageToBinary(cv::Mat source_image) {
     cv::Mat gray_source_image;
     cv::cvtColor(source_image, gray_source_image, cv::COLOR_BGR2GRAY);
 
@@ -37,7 +33,7 @@ cv::Mat PlateFinder::sourceImageToBinary(cv::Mat source_image) {
 
 
 
-vector< cv::Rect > PlateFinder::findPotentialPlateContours(cv::Mat source_img) {
+vector< cv::Rect > PlateSegmentation::findPotentialPlateContours(cv::Mat source_img) {
     cv::Mat binary_src_img = source_img.clone();
 
     cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
@@ -52,7 +48,7 @@ vector< cv::Rect > PlateFinder::findPotentialPlateContours(cv::Mat source_img) {
 }
 
 
-vector< cv::Rect > PlateFinder::transformContoursToRects(vector< vector< cv::Point > > plate_contours) {
+vector< cv::Rect > PlateSegmentation::transformContoursToRects(vector< vector< cv::Point > > plate_contours) {
     vector< cv::Rect > plate_rects;
 
     for (size_t index = 0; index < plate_contours.size(); index++) {
@@ -64,7 +60,7 @@ vector< cv::Rect > PlateFinder::transformContoursToRects(vector< vector< cv::Poi
 }
 
 
-vector< cv::Rect > PlateFinder::removeInvalidPlateContours(vector< cv::Rect > plate_contours) {
+vector< cv::Rect > PlateSegmentation::removeInvalidPlateContours(vector< cv::Rect > plate_contours) {
     vector< cv::Rect > valid_contours;
     size_t total_contours = plate_contours.size();
 
@@ -80,7 +76,7 @@ vector< cv::Rect > PlateFinder::removeInvalidPlateContours(vector< cv::Rect > pl
 }
 
 
-bool PlateFinder::validPlateDimensions(cv::Rect plate_rect) {
+bool PlateSegmentation::validPlateDimensions(cv::Rect plate_rect) {
     double plate_ratio = (double) plate_rect.width / plate_rect.height;
 
     return MIN_PLATE_RATIO < plate_ratio
@@ -90,7 +86,7 @@ bool PlateFinder::validPlateDimensions(cv::Rect plate_rect) {
 }
 
 
-vector< cv::Mat > PlateFinder::getPlateImages(cv::Mat source_img, vector< cv::Rect > plate_contours) {
+vector< cv::Mat > PlateSegmentation::getPlateImages(cv::Mat source_img, vector< cv::Rect > plate_contours) {
     vector< cv::Mat > plate_images;
 
     for (size_t index = 0; index < plate_contours.size(); index++) {
@@ -103,6 +99,6 @@ vector< cv::Mat > PlateFinder::getPlateImages(cv::Mat source_img, vector< cv::Re
 }
 
 
-cv::Mat PlateFinder::getPlateImage(cv::Mat original_img, cv::Rect plate_contour) {
+cv::Mat PlateSegmentation::getPlateImage(cv::Mat original_img, cv::Rect plate_contour) {
     return original_img(plate_contour);
 }
