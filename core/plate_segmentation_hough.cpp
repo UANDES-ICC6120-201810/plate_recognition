@@ -63,6 +63,9 @@ vector< vector< cv::Point > > PlateSegmentation::getContours( cv::Mat & source_e
     return polygons;
 }
 
+/*
+ * Polygons must be ordered starting from lower right corner clockwise
+ */
 vector< cv::Point > PlateSegmentation::OrderPolygonCorners( vector< cv::Point > polygon ) {
 
     int total_points = polygon.size();

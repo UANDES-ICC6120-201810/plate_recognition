@@ -17,7 +17,7 @@ const double PLATE_HEIGHT = 130;
 
 const double PLATE_RATIO_ERROR_RANGE = 0.2;
 
-const double MIN_CHAR_WIDTH_PIXELS = PLATE_WIDTH / ( PLATE_CHARS + 5 );
+const double MIN_CHAR_WIDTH_PIXELS = 22;
 const double MIN_CHAR_HEIGHT_PIXELS = PLATE_HEIGHT / 2;
 const double MIN_PLATE_CHAR_HEIGHT_PERCENTAGE = 0.5;  // Min char height compared to the plate height in %
 

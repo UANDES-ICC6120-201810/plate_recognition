@@ -11,11 +11,7 @@
 
 using namespace std;
 
-cv::Mat plate;
-
 vector< cv::Mat > CharSegmentation::findPlateCharImages(cv::Mat plate_img) {
-    plate = plate_img;
-
     vector< cv::Rect > char_contours = findCharContours(plate_img);
     vector< cv::Mat > char_images = getPlateCharImages(plate_img, char_contours);
 
@@ -145,7 +141,6 @@ vector< cv::Rect> CharSegmentation::getCharRects(cv::Mat binary_img) {
     int right_px = -1;
     bool previous_was_empty = false;
     int height = cropped_img.size().height;
-
 
     for (int i = 0; i < cropped_img.cols; i++) {
         double white_pixels = cv::countNonZero(cropped_img(cv::Rect(i, 0, 1, cropped_img.rows)));
