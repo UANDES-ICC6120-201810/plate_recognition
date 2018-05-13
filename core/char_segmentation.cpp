@@ -151,7 +151,7 @@ vector< cv::Rect> CharSegmentation::getCharRects(cv::Mat binary_img) {
         double white_pixels = cv::countNonZero(cropped_img(cv::Rect(i, 0, 1, cropped_img.rows)));
         double white_pixel_percentage = white_pixels / height;
 
-        bool is_empty = white_pixel_percentage > 0.95;
+        bool is_empty = white_pixel_percentage > 0.9;
         bool detected_right_px = right_px != -1;
 
         bool is_left_px = previous_was_empty && is_empty && !detected_right_px;
