@@ -1,16 +1,26 @@
 #include "char_segmentation.hpp"
 
+#include <iostream>
 #include <vector>
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "Constants.hpp"
+#include "debugger.hpp"
 
+using namespace std;
+
+cv::Mat plate;
 
 vector< cv::Mat > CharSegmentation::findPlateCharImages(cv::Mat plate_img) {
+    plate = plate_img;
+
     vector< cv::Rect > char_contours = findCharContours(plate_img);
     vector< cv::Mat > char_images = getPlateCharImages(plate_img, char_contours);
+
+    debugWriteRecognizedPlate(plate_img);
+    debugWriteRecognizedChars(char_images);
 
     return char_images;
 }
@@ -62,7 +72,7 @@ vector< cv::Rect > CharSegmentation::removeInvalidCharContours(cv::Mat plate_img
     vector< cv::Rect > valid_contours;
     size_t total_contours = char_contours.size();
 
-    for (size_t index = 0; index < char_contours.size(); index++) {
+    for (size_t index = 0; index < total_contours; index++) {
         cv::Rect char_rect = char_contours.at(index);
 
         if (!validPlateCharDimensions(plate_img, char_rect)) continue;
@@ -131,7 +141,7 @@ vector< cv::Rect> CharSegmentation::getCharRects(cv::Mat binary_img) {
 
     int original_y_offset = horizontalCrop.y;
 
-    int left_px = -1;
+    int left_px = 0;
     int right_px = -1;
     bool previous_was_empty = false;
     int height = cropped_img.size().height;
@@ -142,20 +152,20 @@ vector< cv::Rect> CharSegmentation::getCharRects(cv::Mat binary_img) {
         double white_pixel_percentage = white_pixels / height;
 
         bool is_empty = white_pixel_percentage > 0.95;
-
-        bool detected_left_px = left_px != -1;
         bool detected_right_px = right_px != -1;
 
         bool is_left_px = previous_was_empty && is_empty && !detected_right_px;
-        bool is_right_px = !previous_was_empty && is_empty && detected_left_px;
+        bool is_right_px = !previous_was_empty && is_empty;
 
         if (is_left_px) left_px = i + 1;
         if (is_right_px) {
             right_px = i - 1;
             cv::Rect char_rect = getCharRect(left_px, right_px, height, original_y_offset);
-            detected_chars.push_back(char_rect);
 
-            left_px = -1;
+            if ( char_rect.width > MIN_CHAR_WIDTH_PIXELS )
+                detected_chars.push_back(char_rect);
+
+            left_px = i;
             right_px = -1;
         }
 
@@ -166,8 +176,8 @@ vector< cv::Rect> CharSegmentation::getCharRects(cv::Mat binary_img) {
 }
 
 bool CharSegmentation::isValidCropRect(cv::Rect horizontalCrop) {
-    return 0 < horizontalCrop.x
-           && 0 < horizontalCrop.y
+    return 0 <= horizontalCrop.x
+           && 0 <= horizontalCrop.y
            && horizontalCrop.x < horizontalCrop.width
            && horizontalCrop.y < horizontalCrop.height;
 }
@@ -181,32 +191,45 @@ cv::Rect CharSegmentation::getHorizontalCropPlateRect(cv::Mat binary_img) {
 
     int width = binary_img.size().width;
 
-    int upper_px = -1;
+    vector< cv::Rect > black_regions;
+
+    int upper_px = 0;
     int lower_px = -1;
 
     bool previous_was_empty = false;
 
-    for (int i = 0; i < binary_img.rows - 1; i++) {
+    for (int i = 1; i < binary_img.rows - 1; i++) {
 
         double white_pixels = cv::countNonZero(binary_img(cv::Rect(0, i, binary_img.cols, 1)));
         double white_pixel_percentage = white_pixels / width;
 
         bool is_empty = white_pixel_percentage > 0.8;
         bool detected_lower_px = lower_px != -1;
-        bool detected_upper_px = upper_px != -1;
 
         bool is_upper_px = previous_was_empty && is_empty && !detected_lower_px;
-        bool is_lower_px = !previous_was_empty && is_empty && detected_upper_px;
+        bool is_lower_px = !previous_was_empty && is_empty;
 
         if (is_upper_px) upper_px = i + 1;
-        if (is_lower_px) lower_px = i;
+        if (is_lower_px) {
+            lower_px = i - 1;
+
+            cv::Rect horizontalCrop = cv::Rect(0, upper_px, width, lower_px - upper_px);
+
+            if (lower_px - upper_px > MIN_CHAR_HEIGHT_PIXELS)
+                black_regions.push_back(horizontalCrop);
+
+            upper_px = i;
+            lower_px = -1;
+        }
 
         previous_was_empty = is_empty;
     }
 
-    cv::Rect horizontalCrop = cv::Rect(0, upper_px, width, lower_px - upper_px);
+    if ( black_regions.size() > 0 )
+        return black_regions.at( 0 );
 
-    return horizontalCrop;
+    cv::Rect empty_rect;
+    return empty_rect;
 }
 
 

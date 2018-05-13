@@ -12,13 +12,13 @@ const int CLASS_SAMPLES_AMOUNT = 10;
 const int SVM_FEATURES_AMOUNT = 32;
 
 const int PLATE_CHARS = 6;
-const double PLATE_WIDTH = 36;
-const double PLATE_HEIGHT = 13;
+const double PLATE_WIDTH = 360;
+const double PLATE_HEIGHT = 130;
 
 const double PLATE_RATIO_ERROR_RANGE = 0.2;
 
-const double MIN_CHAR_WIDTH_PIXELS = 5;
-const double MIN_CHAR_HEIGHT_PIXELS = 10;
+const double MIN_CHAR_WIDTH_PIXELS = PLATE_WIDTH / ( PLATE_CHARS + 4 );
+const double MIN_CHAR_HEIGHT_PIXELS = PLATE_HEIGHT / 2;
 const double MIN_PLATE_CHAR_HEIGHT_PERCENTAGE = 0.5;  // Min char height compared to the plate height in %
 
 const double MIN_PLATE_WIDTH = PLATE_CHARS * MIN_CHAR_WIDTH_PIXELS;

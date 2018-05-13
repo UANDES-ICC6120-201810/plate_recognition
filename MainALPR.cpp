@@ -13,7 +13,7 @@ using namespace std;
 int frame_file_name_counter = 0;
 
 void getPlateFor( cv::Mat source_image ) {
-    vector< cv::Mat > plates = PlateSegmentation().findPlateImages( source_image );
+    vector< cv::Mat > plates = PlateSegmentation().findPlateImagesH( source_image );
 
     if ( plates.size() < 1 ) {
         cout << "No plates found!" << endl;
