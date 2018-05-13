@@ -5,6 +5,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/calib3d.hpp>
+#include <math.h>
 
 #include "Constants.hpp"
 
@@ -54,11 +55,44 @@ vector< vector< cv::Point > > PlateSegmentation::getContours( cv::Mat & source_e
         cv::approxPolyDP( hull, polygon, 20, true );
 
         if (polygon.size() == 4 ) {
+            polygon = OrderPolygonCorners( polygon );
             polygons.push_back( polygon );
         }
     }
 
     return polygons;
+}
+
+vector< cv::Point > PlateSegmentation::OrderPolygonCorners( vector< cv::Point > polygon ) {
+
+    int total_points = polygon.size();
+    int index_max = -1;
+    double distance_max = -1;
+
+    for ( int index = 0; index < total_points; index++ ) {
+        double point_distance = PointOriginDistance(polygon.at(index));
+
+        if (point_distance > distance_max) {
+            index_max = index;
+            distance_max = point_distance;
+        }
+    }
+
+    vector< cv::Point > ordered_polygon;
+
+    for ( int index = index_max; index < total_points; index++ ) {
+        ordered_polygon.push_back( polygon.at( index ) );
+    }
+
+    for ( int index = 0; index < index_max; index++ ) {
+        ordered_polygon.push_back( polygon.at( index ) );
+    }
+
+    return ordered_polygon;
+}
+
+double PlateSegmentation::PointOriginDistance( cv::Point point ) {
+    return sqrt( ( pow( point.x, 2 ) + pow( point.y, 2 ) ) );
 }
 
 cv::Mat PlateSegmentation::WrapPlateContour( cv::Mat source_img, vector< cv::Point > plate_polygons ) {

@@ -23,6 +23,9 @@ class PlateSegmentation {
         cv::Mat sourceImageToEdges(cv::Mat source_image);
         vector< vector< cv::Point > > getContours( cv::Mat & source_edges );
         cv::Mat WrapPlateContour( cv::Mat source_img, vector< cv::Point > plate_polygons );
+
+        vector< cv::Point > OrderPolygonCorners( vector< cv::Point > polygon );
+        double PointOriginDistance( cv::Point point );
 };
 
 #endif
