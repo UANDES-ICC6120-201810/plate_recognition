@@ -44,12 +44,8 @@ vector< vector< cv::Point > > PlateSegmentation::getContours( cv::Mat & source_e
     vector< vector< cv::Point > > polygons;
 
     for ( int index = 0; index < contours.size(); index++ ) {
-
-        cv::Mat approxPoly_mask( source_edges.rows, source_edges.cols, CV_8UC1 );
-        approxPoly_mask = cv::Scalar( 0 );
-
-        vector< cv::Point > hull;
         cv::Mat contour( contours[ index ] );
+        vector< cv::Point > hull;
 
         convexHull( contour, hull, false );
 
@@ -67,15 +63,11 @@ vector< vector< cv::Point > > PlateSegmentation::getContours( cv::Mat & source_e
 
 cv::Mat PlateSegmentation::WrapPlateContour( cv::Mat source_img, vector< cv::Point > plate_polygons ) {
 
-    cv::Mat wrapped_plate( PLATE_HEIGHT, PLATE_WIDTH, CV_8UC3 );
-
+    cv::Mat warpped_plate( PLATE_HEIGHT, PLATE_WIDTH, CV_8UC3 );
     vector< cv::Point> real_plate_polygons;
-
-    real_plate_polygons = {cv::Point(wrapped_plate.cols, wrapped_plate.rows), cv::Point(0, wrapped_plate.rows), cv::Point(0, 0), cv::Point(wrapped_plate.cols, 0)};
-
+    real_plate_polygons = {cv::Point(PLATE_WIDTH, PLATE_HEIGHT), cv::Point(0, PLATE_HEIGHT), cv::Point(0, 0), cv::Point(PLATE_WIDTH, 0)};
     cv::Mat homography = cv::findHomography( plate_polygons, real_plate_polygons );
+    cv::warpPerspective(source_img, warpped_plate, homography, cv::Size(PLATE_WIDTH, PLATE_HEIGHT));
 
-    cv::warpPerspective(source_img, wrapped_plate, homography, cv::Size(wrapped_plate.cols, wrapped_plate.rows));
-
-    return wrapped_plate;
+    return warpped_plate;
 }
