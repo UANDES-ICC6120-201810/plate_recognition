@@ -4,6 +4,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "core/Constants.hpp"
 #include "core/plate_segmentation.hpp"
 #include "core/char_segmentation.hpp"
 #include "core/ocr_detector.hpp"
@@ -15,10 +16,7 @@ int frame_file_name_counter = 0;
 void getPlateFor( cv::Mat source_image ) {
     vector< cv::Mat > plates = PlateSegmentation().findPlateImagesH( source_image );
 
-    if ( plates.size() < 1 ) {
-        cout << "No plates found!" << endl;
-        return;
-    }
+    if ( plates.size() < 1 ) return;
 
     for ( size_t index = 0; index < plates.size(); index++ ) {
         cv::Mat plate_image = plates.at(index);
@@ -27,8 +25,7 @@ void getPlateFor( cv::Mat source_image ) {
 
         string plate_text = OcrDetector().plateCharsToString(plate_chars);
 
-        if ( plate_text != "" )
-            cout << plate_text << endl;
+        if ( plate_text != EMPTY_PLATE ) cout << plate_text << endl;
     }
 
 }

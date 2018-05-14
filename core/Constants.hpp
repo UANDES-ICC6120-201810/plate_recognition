@@ -14,6 +14,7 @@ const int SVM_FEATURES_AMOUNT = 32;
 const int PLATE_CHARS = 6;
 const double PLATE_WIDTH = 360;
 const double PLATE_HEIGHT = 130;
+const string EMPTY_PLATE = "";
 
 const double PLATE_RATIO_ERROR_RANGE = 0.2;
 

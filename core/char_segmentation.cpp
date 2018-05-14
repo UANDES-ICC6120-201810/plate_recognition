@@ -84,12 +84,9 @@ vector< cv::Rect > CharSegmentation::removeInvalidCharContours(cv::Mat plate_img
 
 
 bool CharSegmentation::validPlateCharDimensions(cv::Mat plate_img, cv::Rect char_rect) {
-    double min_char_height = plate_img.size().height * MIN_PLATE_CHAR_HEIGHT_PERCENTAGE;
-    double max_char_width = plate_img.size().width / (PLATE_CHARS - 1);
-
-    return char_rect.height > min_char_height
+    return char_rect.height > MIN_CHAR_HEIGHT_PIXELS
            && MIN_CHAR_WIDTH_PIXELS < char_rect.width
-           && char_rect.width < max_char_width;
+           && char_rect.width < MIN_CHAR_WIDTH_PIXELS;
 }
 
 
