@@ -6,7 +6,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "Constants.hpp"
+#include "constants.hpp"
 #include "debugger.hpp"
 
 using namespace std;

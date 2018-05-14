@@ -7,7 +7,7 @@
 #include <opencv2/calib3d.hpp>
 #include <math.h>
 
-#include "Constants.hpp"
+#include "constants.hpp"
 
 vector< cv::Mat > PlateSegmentation::findPlateImagesH(cv::Mat source_img) {
     cv::Mat source_edges = sourceImageToEdges(source_img);

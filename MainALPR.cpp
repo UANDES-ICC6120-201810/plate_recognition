@@ -4,7 +4,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "core/Constants.hpp"
+#include "core/constants.hpp"
 #include "core/plate_segmentation.hpp"
 #include "core/char_segmentation.hpp"
 #include "core/ocr_detector.hpp"

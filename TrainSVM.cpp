@@ -6,7 +6,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/ml.hpp>
 
-#include "core/Constants.hpp"
+#include "core/constants.hpp"
 #include "core/SVMCharDetector.hpp"
 
 

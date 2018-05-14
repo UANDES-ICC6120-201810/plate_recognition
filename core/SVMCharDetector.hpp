@@ -7,7 +7,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/ml.hpp>
 
-#include "Constants.hpp"
+#include "constants.hpp"
 
 static int colorPixelsAmount2(cv::Mat img, bool black_pixel = true) {
     int black = 0;
