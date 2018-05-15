@@ -8,7 +8,7 @@ a picture of a car.
 > f schrift font
 
 ## To compile SVMTrain.cpp
-> $ g++ TrainSVM.cpp $(pkg-config --libs opencv) -o TrainSVM
+> $ g++ TrainSVM.cpp core/svm_char_detector.cpp $(pkg-config --libs opencv) -o TrainSVM
 
 Then simply run
 $ ./SVMTrain

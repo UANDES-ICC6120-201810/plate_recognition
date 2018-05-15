@@ -14,16 +14,21 @@ using namespace std;
 int frame_file_name_counter = 0;
 
 void getPlateFor( cv::Mat source_image ) {
+    OcrDetector char_detector( SVM_TRAINED_DATA_PATH );
+
     vector< cv::Mat > plates = PlateSegmentation().findPlateImages( source_image );
 
+
     if ( plates.size() < 1 ) return;
+
+    CharSegmentation char_divider;
 
     for ( size_t index = 0; index < plates.size(); index++ ) {
         cv::Mat plate_image = plates.at(index);
 
-        vector< cv::Mat > plate_chars = CharSegmentation().findPlateCharImages( plate_image );
+        vector< cv::Mat > plate_chars = char_divider.findPlateCharImages( plate_image );
 
-        string plate_text = OcrDetector().plateCharsToString(plate_chars);
+        string plate_text = char_detector.plateCharsToString( plate_chars );
 
         if ( plate_text != EMPTY_PLATE ) cout << plate_text << endl;
     }

@@ -3,7 +3,14 @@
 #include <string>
 #include <opencv2/core/mat.hpp>
 
-#include "SVMCharDetector.hpp"
+#include "svm_char_detector.hpp"
+
+using namespace std;
+
+
+OcrDetector::OcrDetector( string trained_data_path) {
+    svm_detector = new SvmCharDetector(trained_data_path);
+}
 
 
 string OcrDetector::plateCharsToString( vector< cv::Mat > char_images ) {
@@ -18,6 +25,7 @@ string OcrDetector::plateCharsToString( vector< cv::Mat > char_images ) {
     return licence_text;
 }
 
+
 char OcrDetector::charImageToChar( cv::Mat char_image ) {
-    return detectCharFromImage(char_image);
+    return svm_detector -> detectCharFromImage( char_image );
 }
