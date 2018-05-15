@@ -7,28 +7,21 @@
 using namespace std;
 
 class PlateSegmentation {
-    public:
-        vector< cv::Mat > findPlateImages(cv::Mat source_img);
-        vector< cv::Mat > findPlateImagesH(cv::Mat source_img);
+public:
+    vector< cv::Mat > findPlateImages( cv::Mat source_img );
 
-    private:
-        vector< cv::Rect > findPotentialPlateContours(cv::Mat source_img);
-        cv::Mat sourceImageToBinary(cv::Mat source_image);
-        vector< cv::Rect > transformContoursToRects(vector< vector< cv::Point > > plate_contours);
-        vector< cv::Rect > removeInvalidPlateContours(vector< cv::Rect > plate_contours);
-        bool validPlateDimensions(cv::Rect plate_rect);
-        vector< cv::Mat > getPlateImages(cv::Mat source_img, vector< cv::Rect > plate_contours);
-        cv::Mat getPlateImage(cv::Mat original_img, cv::Rect plate_contour);
+private:
+    cv::Mat sourceImageToEdges(cv::Mat source_image);
+    vector< vector< cv::Point > > getPolygons( cv::Mat & source_edges );
 
-        cv::Mat sourceImageToEdges(cv::Mat source_image);
-        vector< vector< cv::Point > > getPolygons( cv::Mat & source_edges );
-        cv::Mat WrapPlateContour( cv::Mat source_img, vector< cv::Point > plate_polygons );
+    vector< cv::Point > getPolygonFromContour( vector< cv::Point > contour );
+    bool isValidPolygon( vector< cv::Point > polygon );
 
-        vector< cv::Point > getPolygonFromContour( vector< cv::Point > contour );
-        bool isValidPolygon( vector< cv::Point > polygon );
+    vector< cv::Point > OrderPolygonCorners( vector< cv::Point > polygon );
+    double PointOriginDistance( cv::Point point );
 
-        vector< cv::Point > OrderPolygonCorners( vector< cv::Point > polygon );
-        double PointOriginDistance( cv::Point point );
+    cv::Mat WrapPlateContour( cv::Mat source_img, vector< cv::Point > plate_polygons );
+    cv::Mat sourceImageToBinary(cv::Mat source_image);
 };
 
 #endif
