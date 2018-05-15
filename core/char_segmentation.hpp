@@ -26,7 +26,6 @@ private:
     bool isColEmpty( cv::Mat binary_img, int col_index );
 
     vector< cv::Rect > sortPlateCharsByX( vector< cv::Rect > plate_chars );
-    bool sortRectsByX( cv::Rect first, cv::Rect second );
 
     vector< cv::Mat > getPlateCharImages( cv::Mat plate_img, vector< cv::Rect > char_contours );
 };

@@ -23,11 +23,10 @@ vector< cv::Mat > CharSegmentation::findPlateCharImages( cv::Mat plate_img ) {
 
 
 vector< cv::Rect > CharSegmentation::findCharContours( cv::Mat plate_img ) {
-    vector< cv::Rect > empty_contours;
     vector< cv::Rect > valid_contours = getCharRects( plate_img );
 
     bool detected_enough_chars = valid_contours.size() >= PLATE_CHARS;
-    if ( !detected_enough_chars ) return empty_contours;
+    if ( !detected_enough_chars ) return {};
 
     vector< cv::Rect > sorted_chars = sortPlateCharsByX( valid_contours );
 
@@ -37,11 +36,9 @@ vector< cv::Rect > CharSegmentation::findCharContours( cv::Mat plate_img ) {
 
 vector< cv::Rect> CharSegmentation::getCharRects( cv::Mat binary_img ) {
     cv::Rect horizontalCrop = getHorizontalCropPlateRect(binary_img);
-
-    vector< cv::Rect > empty_chars;
     bool isNotValidCrop = !isValidPlateCropRect( horizontalCrop );
 
-    if ( isNotValidCrop ) return empty_chars;
+    if ( isNotValidCrop ) return {};
 
     cv::Mat cropped_img = binary_img( horizontalCrop );
     int original_y_offset = horizontalCrop.y;
@@ -161,17 +158,17 @@ bool CharSegmentation::isColEmpty( cv::Mat binary_img, int col_index ) {
 }
 
 
+bool sortRectsByX( cv::Rect first, cv::Rect second ) {
+    return first.x < second.x;
+}
+
+
 vector<cv::Rect> CharSegmentation::sortPlateCharsByX( vector< cv::Rect > plate_chars ) {
     int chars_amount = plate_chars.size();
 
     sort( plate_chars.begin(), plate_chars.end(), sortRectsByX);
 
     return plate_chars;
-}
-
-
-bool CharSegmentation::sortRectsByX( cv::Rect first, cv::Rect second ) {
-    return first.x < second.x;
 }
 
 
