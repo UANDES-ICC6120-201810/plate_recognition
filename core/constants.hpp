@@ -22,6 +22,9 @@ const double MIN_CHAR_WIDTH_PIXELS = 22;
 const double MIN_CHAR_HEIGHT_PIXELS = PLATE_HEIGHT / 2;
 const double MIN_PLATE_CHAR_HEIGHT_PERCENTAGE = 0.5;  // Min char height compared to the plate height in %
 
+const double EMPTY_ROW_RATIO = 0.8;
+const double EMPTY_COL_RATIO = 0.9;
+
 const double MIN_PLATE_WIDTH = PLATE_CHARS * MIN_CHAR_WIDTH_PIXELS;
 const double MIN_PLATE_HEIGHT = MIN_CHAR_HEIGHT_PIXELS;
 

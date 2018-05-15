@@ -1,5 +1,7 @@
 #include "plate_segmentation.hpp"
 
+#include <iostream>
+
 #include <opencv2/core/mat.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -8,9 +10,16 @@
 #include <math.h>
 
 #include "constants.hpp"
+#include "debugger.hpp"
+
+cv::Mat source_image;
 
 vector< cv::Mat > PlateSegmentation::findPlateImagesH(cv::Mat source_img) {
+    source_image = source_img.clone();
     cv::Mat source_edges = sourceImageToEdges(source_img);
+
+    debugWriteImage(source_edges, "./out/debug_edges.jpg");
+
     vector< vector< cv::Point > > plates_polygons = getPolygons( source_edges );
     vector< cv::Mat > plate_images;
 
@@ -38,7 +47,7 @@ cv::Mat PlateSegmentation::sourceImageToEdges(cv::Mat source_image) {
 
 vector< vector< cv::Point > > PlateSegmentation::getPolygons( cv::Mat & source_edges ) {
     vector< vector< cv::Point > > contours;
-    cv::findContours( source_edges, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE );
+    cv::findContours( source_edges, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE );
 
     /// Find the convex hull object for each contour
 
@@ -50,8 +59,12 @@ vector< vector< cv::Point > > PlateSegmentation::getPolygons( cv::Mat & source_e
         if ( isValidPolygon( polygon ) ) {
             polygon = OrderPolygonCorners( polygon );
             polygons.push_back( polygon );
+
+            cv::Scalar color( rand()&255, rand()&255, rand()&255 );
+            cv::drawContours(source_image, polygons, polygons.size() - 1, color, 2);
         }
     }
+    debugWriteImage(source_image, "./out/debug_polygon.jpg");
 
     return polygons;
 }
@@ -60,10 +73,13 @@ vector< cv::Point > PlateSegmentation::getPolygonFromContour( vector< cv::Point 
     cv::Mat mat_contour( contour );
 
     vector< cv::Point > hull;
-    cv::convexHull( mat_contour, hull, false );
+    cv::convexHull( mat_contour, hull );
+
+    double epsilon = 19;
+    bool closed = true;
 
     vector< cv::Point > polygon;
-    cv::approxPolyDP( hull, polygon, 20, true );
+    cv::approxPolyDP( hull, polygon, epsilon, closed );
 
     return polygon;
 }
