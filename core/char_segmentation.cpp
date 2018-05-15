@@ -108,7 +108,7 @@ bool CharSegmentation::isValidPlateCropRect( cv::Rect plate_crop_rect ) {
 
 
 vector< cv::Rect > CharSegmentation::getVerticalCropCharRects( cv::Mat plate_img, int original_y_offset ) {
-    const int char_height = plate_img.size().height - original_y_offset;
+    const int char_height = plate_img.size().height;
 
     int left_x_coord = 0;
     int right_x_coord = -1;
