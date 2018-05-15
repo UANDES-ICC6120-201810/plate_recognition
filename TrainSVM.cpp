@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "core/constants.hpp"
 #include "core/svm_char_detector.hpp"
 
 
@@ -13,12 +14,8 @@ int main( int argc, char *argv[] ) {
         return 0;
     }
 
-    string training_set_path = "./data/";
-    string trained_svm_path = "svm.txt";
-
     SvmCharDetector svm_char_detector;
-
-    bool train = svm_char_detector.train( training_set_path, trained_svm_path );
+    bool train = svm_char_detector.train( SVM_TRAINING_DATA_PATH, SVM_TRAINED_DATA_PATH );
 
     if ( train )
         cout << "SVM Training Completed" << endl;

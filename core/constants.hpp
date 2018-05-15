@@ -6,6 +6,7 @@
 using namespace std;
 
 const string SVM_TRAINED_DATA_PATH = "trained-svm.xml";
+const string SVM_TRAINING_DATA_PATH = "./data/";
 
 const int CLASSES_AMOUNT = 30;
 const int CLASS_SAMPLES_AMOUNT = 10;
