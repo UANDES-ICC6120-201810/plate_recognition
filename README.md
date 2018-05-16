@@ -21,7 +21,7 @@ Run command
 
 
 ## To compile RecogSVM.cpp
-> $ g++ MainALPR.cpp core/plate_segmentation.cpp core/char_segmentation.cpp core/ocr_detector.cpp core/SVMCharDetector.hpp core/constants.hpp core/debugger.cpp $(pkg-config --libs opencv) -o main
+> $ g++ MainALPR.cpp core/plate_segmentation.cpp core/char_segmentation.cpp core/ocr_detector.cpp core/svm_char_detector.cpp core/constants.hpp core/debugger.cpp $(pkg-config --libs opencv) -o MainALPR
 
 Then simply run
 > $ ./RecogSVM ./samples/<image_name>
