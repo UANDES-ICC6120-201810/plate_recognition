@@ -1,5 +1,7 @@
 #!/bin/bash
 
+git pull
+
 TOTAL_STEPS="4"
 
 echo "Step 1/$TOTAL_STEPS : Compiling SVM training" \
@@ -14,4 +16,4 @@ echo "Step 1/$TOTAL_STEPS : Compiling SVM training" \
 && echo "ALPR compiled correctly!" \
 && echo \
 && echo "Step 4/$TOTAL_STEPS : Starting ALPR" \
-&& ./MainALPR samples/CL-001.jpg
+&& ./MainALPR samples/CL-002.jpg
