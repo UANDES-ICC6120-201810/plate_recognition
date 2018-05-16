@@ -14,4 +14,4 @@ echo "Step 1/$TOTAL_STEPS : Compiling SVM training" \
 && echo "ALPR compiled correctly!" \
 && echo \
 && echo "Step 4/$TOTAL_STEPS : Starting ALPR" \
-&& ./MainALPR
+&& ./MainALPR samples/CL-001.jpg
