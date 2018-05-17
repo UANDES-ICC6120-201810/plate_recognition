@@ -47,9 +47,7 @@ void getPlateForStream( string stream_name ) {
         bool no_image = !video_stream -> read( source_image );
 
         if ( no_image ) return;
-        cout << "ALPR: reading image" << endl;
         getPlateFor( source_image );
-        cout << "ALPR: read image" << endl;
     }
 }
 
