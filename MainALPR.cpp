@@ -4,10 +4,13 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include "core/async_video_read.h"
 #include "core/constants.hpp"
 #include "core/plate_segmentation.hpp"
 #include "core/char_segmentation.hpp"
 #include "core/ocr_detector.hpp"
+
+#include "core/debugger.hpp"
 
 using namespace std;
 
@@ -36,17 +39,13 @@ void getPlateFor( cv::Mat source_image ) {
 }
 
 void getPlateForStream( string stream_name ) {
-    cv::VideoCapture *video_stream = new cv::VideoCapture( stream_name );
-
-    bool stream_closed = !video_stream -> isOpened();
-
-    if ( stream_closed ) return;
-    cv::Mat source_image;
+    AsyncVideoReader *asyncVideoReader = new AsyncVideoReader( stream_name );
 
     while ( true ) {
-        bool no_image = !video_stream -> read( source_image );
+        bool no_image = !asyncVideoReader -> hasFrame();
+        if ( no_image ) continue;
 
-        if ( no_image ) return;
+        cv::Mat source_image = asyncVideoReader -> getFrame();
         getPlateFor( source_image );
     }
 }

@@ -12,7 +12,7 @@ echo "Step 1/$TOTAL_STEPS : Compiling SVM training" \
 && ./TrainSVM \
 && echo \
 && echo "Step 3/$TOTAL_STEPS : Compiling ALPR" \
-&& g++ MainALPR.cpp core/plate_segmentation.cpp core/char_segmentation.cpp core/ocr_detector.cpp core/svm_char_detector.cpp core/constants.hpp core/debugger.cpp $(pkg-config --libs opencv) -o MainALPR \
+&& g++ MainALPR.cpp core/async_video_read.cpp -lpthread core/plate_segmentation.cpp core/char_segmentation.cpp core/ocr_detector.cpp core/svm_char_detector.cpp core/constants.hpp core/debugger.cpp $(pkg-config --libs opencv) -o MainALPR \
 && echo "ALPR compiled correctly!" \
 && echo \
 && echo "Step 4/$TOTAL_STEPS : Starting ALPR" \
