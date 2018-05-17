@@ -62,7 +62,7 @@ int main( int argc, char *argv[] ) {
     string source_file_name;
 
     if ( argc < 2 ) {
-        source_file_name = "rtsp://taller:taller2018@192.168.2.2:88/videoMain";
+        source_file_name = "rtsp://taller:taller2018@192.168.1.10:88/videoMain";
         getPlateForStream( source_file_name );
 
     } else if ( argc == 2 ) {
