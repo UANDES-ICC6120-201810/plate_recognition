@@ -47,15 +47,17 @@ void getPlateForStream( string stream_name ) {
         bool no_image = !video_stream -> read( source_image );
 
         if ( no_image ) return;
+        cout << "ALPR: reading image" << endl;
         getPlateFor( source_image );
+        cout << "ALPR: read image" << endl;
     }
 }
 
 int main( int argc, char *argv[] ) {
 
     if ( CV_MAJOR_VERSION < 3 ) {
-        cout << "OpenCV version: " << CV_MAJOR_VERSION << endl;
-        cout << "Old OpenCV version found, required 3+" << endl;
+        cout << "ALPR: OpenCV version: " << CV_MAJOR_VERSION << endl;
+        cout << "ALPR: Old OpenCV version found, required 3+" << endl;
         return 1;
     }
 
@@ -64,6 +66,8 @@ int main( int argc, char *argv[] ) {
     if ( argc < 2 ) {
         source_file_name = "rtsp://taller:taller2018@192.168.1.10:88/videoMain";
         getPlateForStream( source_file_name );
+
+        cout << "ALPR: Ending stream capture..." << endl;
 
     } else if ( argc == 2 ) {
         source_file_name = argv[1];
