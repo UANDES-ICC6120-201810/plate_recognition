@@ -10,11 +10,8 @@
 #include "core/char_segmentation.hpp"
 #include "core/ocr_detector.hpp"
 
-#include "core/debugger.hpp"
-
 using namespace std;
 
-int frame_file_name_counter = 0;
 
 void getPlateFor( cv::Mat source_image ) {
     OcrDetector char_detector( SVM_TRAINED_DATA_PATH );
