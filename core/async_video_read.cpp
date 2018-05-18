@@ -1,11 +1,21 @@
 #include "async_video_read.h"
 
 #include <thread>
+#include <unistd.h>
 #include <opencv2/highgui/highgui.hpp>
 
 AsyncVideoReader::AsyncVideoReader(string stream_name) {
-    video_stream = new cv::VideoCapture( stream_name );
-    is_stream_opened = false;
+
+    while ( !is_stream_opened ) {
+        video_stream = new cv::VideoCapture( stream_name );
+        is_stream_opened = video_stream -> isOpened();
+
+        if ( !is_stream_opened ) {
+            cout << "Camera not found, is connected to the LAN?" << endl;
+            usleep( ms * 1000 );
+        }
+    }
+    
     has_frame = false;
 
     thread asyncFrameReader(&AsyncVideoReader::readFrame, this);
