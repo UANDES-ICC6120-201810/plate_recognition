@@ -27,32 +27,30 @@ SvmCharDetector::SvmCharDetector( string trained_data_path ) {
 char SvmCharDetector::detectCharFromImage( cv::Mat char_image ) {
     vector<float> image_features = calculateImageFeatures(char_image);
 
-    cv::Mat m = cv::Mat(1, SVM_FEATURES_AMOUNT, CV_32FC1);
+    cv::Mat features = cv::Mat(image_features).t();
 
-    for ( size_t i = 0; i < SVM_FEATURES_AMOUNT; i++ ) {
-        m.at<float>(0, i) = image_features[i];
-    }
+    int class_folder_label = int(svm_pointer -> predict( features ));
 
-    int ri = int(svm_pointer -> predict( m ));
+    if (0 <= class_folder_label && class_folder_label <= 9)
+        return (char) (class_folder_label + '0');
 
-    if (ri >= 0 && ri <= 9)
-        return (char) (ri + '0'); //ma ascii 0 = 48
+    if (A <= class_folder_label && class_folder_label <= H)
+        return (char) (class_folder_label + 55);
 
-    if (ri >= 10 && ri < 18)
-        return (char) (ri + 55); //ma accii A = 5, --> tu A-H
+    int skip_i_j = 2;
 
-    if (ri >= 18 && ri < 22)
-        return (char) (ri + 55 + 2); //K-N, bo I,J
+    if (K <= class_folder_label && class_folder_label <= N)
+        return (char) (class_folder_label + 55 + skip_i_j);
 
-    if (ri == 22) return 'P';
+    if (class_folder_label == P) return 'P';
 
-    if (ri == 23) return 'S';
+    if (class_folder_label == S) return 'S';
 
-    if (ri >= 24 && ri < 27)
-        return (char) (ri + 60); //T-V,
+    if (T <= class_folder_label && class_folder_label <= V)
+        return (char) (class_folder_label + 60);
 
-    if (ri >= 27 && ri < 30)
-        return (char) (ri + 61); //X-Z
+    if (X <= class_folder_label && class_folder_label <= Z)
+        return (char) (class_folder_label + 61);
 
     return '*';
 }
