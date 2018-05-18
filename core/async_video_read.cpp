@@ -37,8 +37,6 @@ void AsyncVideoReader::readFrame() {
 
         if ( is_stream_opened )
             has_frame = video_stream -> read( current_frame );
-        else
-            openStream();
     }
 }
 
