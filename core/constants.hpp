@@ -41,5 +41,11 @@ const int LOWER = 1;
 const int LEFT = 0;
 const int RIGHT = 1;
 
+const int FEATURE_WIDTH = 40;
+const int FEATURE_HEIGHT = 40;
+
+const int CELL_WIDTH = FEATURE_WIDTH / 4;
+const int CELL_HEIGHT = FEATURE_HEIGHT / 4;
+
 
 #endif

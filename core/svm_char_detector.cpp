@@ -29,9 +29,8 @@ char SvmCharDetector::detectCharFromImage( cv::Mat char_image ) {
 
     cv::Mat m = cv::Mat(1, SVM_FEATURES_AMOUNT, CV_32FC1);
 
-    for (size_t i = 0; i < image_features.size(); ++i) {
-        float temp = image_features[i];
-        m.at<float>(0, i) = temp;
+    for ( size_t i = 0; i < SVM_FEATURES_AMOUNT; i++ ) {
+        m.at<float>(0, i) = image_features[i];
     }
 
     int ri = int(svm_pointer -> predict( m ));
@@ -59,33 +58,45 @@ char SvmCharDetector::detectCharFromImage( cv::Mat char_image ) {
 }
 
 
-vector<float> SvmCharDetector::calculateImageFeatures(cv::Mat source_image) {
+vector<float> SvmCharDetector::calculateImageFeatures( cv::Mat source_image ) {
     cv::Mat clean_image = cleanSourceImage( source_image );
 
-    vector<float> image_features;
+    vector< float > image_features;
 
-    cv::resize(clean_image, clean_image, cv::Size(40, 40));
-    int img_height = clean_image.rows / 4;
-    int img_width = clean_image.cols / 4;
-    int S = colorPixelsAmount(clean_image, true);
-    int T = clean_image.cols * clean_image.rows;
-    for (int i = 0; i < clean_image.rows; i += img_height) {
-        for (int j = 0; j < clean_image.cols; j += img_width) {
-            cv::Mat cell = clean_image(cv::Rect(i, j, img_height, img_width));
-            int s = colorPixelsAmount(cell, true);
-            float f = (float) s / S;
-            image_features.push_back(f);
+    int feature_index = 0;
+
+    cv::resize( clean_image, clean_image, cv::Size( FEATURE_WIDTH, FEATURE_HEIGHT ) );
+
+    int image_color_pixels = colorPixelsAmount( clean_image, true );
+
+    for ( int row_index = 0; row_index < clean_image.rows; row_index += CELL_HEIGHT ) {
+        for ( int col_index = 0; col_index < clean_image.cols; col_index += CELL_WIDTH ) {
+
+            cv::Mat cell = clean_image( cv::Rect( row_index, col_index, CELL_HEIGHT, CELL_WIDTH ) );
+
+            int cell_color_pixels = colorPixelsAmount( cell, true );
+            float feature = ( float ) cell_color_pixels / image_color_pixels;
+
+            image_features.push_back( feature );
         }
     }
 
-    for (int i = 0; i < 16; i += 4) {
-        float f = image_features[i] + image_features[i + 1] + image_features[i + 2] + image_features[i + 3];
-        image_features.push_back(f);
+    for ( int i = 0; i < 16; i += 4 ) {
+        float feature = image_features[ i ];
+        feature += image_features[ i + 1 ];
+        feature += image_features[ i + 2 ];
+        feature += image_features[ i + 3 ];
+
+        image_features.push_back( feature );
     }
 
-    for (int i = 0; i < 4; ++i) {
-        float f = image_features[i] + image_features[i + 4] + image_features[i + 8] + image_features[i + 12];
-        image_features.push_back(f);
+    for ( int i = 0; i < 4; i++ ) {
+        float feature = image_features[ i ];
+        feature += image_features[ i + 4 ];
+        feature += image_features[ i + 8 ];
+        feature += image_features[ i + 12 ];
+
+        image_features.push_back( feature );
     }
 
     image_features.push_back(image_features[0] + image_features[5] + image_features[10] + image_features[15]);
@@ -102,32 +113,32 @@ vector<float> SvmCharDetector::calculateImageFeatures(cv::Mat source_image) {
 
 
 cv::Mat SvmCharDetector::cleanSourceImage( cv::Mat source_image ) {
-    cv::Mat clean_image;
-    if (source_image.channels() == 3) {
-        cv::cvtColor(source_image, clean_image, cv::COLOR_BGR2GRAY);
-        cv::threshold(clean_image, clean_image, 100, 255, cv::THRESH_BINARY);
-    } else {
-        cv::threshold(source_image, clean_image, 100, 255, cv::THRESH_BINARY);
-    }
+    cv::Mat clean_image = source_image.clone();
+
+    if (source_image.channels() == 3)
+        cv::cvtColor(clean_image, clean_image, cv::COLOR_BGR2GRAY);
+
+    cv::threshold(clean_image, clean_image, 100, 255, cv::THRESH_BINARY);
+
     return clean_image;
 }
 
 
 int SvmCharDetector::colorPixelsAmount(cv::Mat img, bool black_pixel) {
-    int black = 0;
-    int white = 0;
+    int pixels = 0;
 
-    for (int row = 0; row < img.rows; ++row)
-        for (int col = 0; col < img.cols; ++col) {
-            if (img.at<uchar>(row, col) == 0)
-                black++;
-            else
-                white++;
-        }
-    if (black_pixel)
-        return black;
-    else
-        return white;
+    for ( int row_index = 0; row_index < img.rows; row_index++ ) {
+        cv::Mat row_img = img( cv::Rect( 0, row_index, img.cols, 1 ) );
+
+        int row_white_pixels = cv::countNonZero( row_img );
+
+        if ( black_pixel )
+            pixels += img.cols - row_white_pixels;
+        else
+            pixels += row_white_pixels;
+    }
+
+    return pixels;
 }
 
 
@@ -213,7 +224,7 @@ bool SvmCharDetector::train(string training_set_path, string trained_svm_path) {
                 return false;
             }
 
-            vector<float> class_sample_features = calculateImageFeatures(class_sample_image);
+            vector<float> class_sample_features = calculateImageFeatures( class_sample_image );
 
             for (size_t t = 0; t < class_sample_features.size(); ++t)
                 samples_matrix.at<float>(sample_index, t) = class_sample_features.at(t);
