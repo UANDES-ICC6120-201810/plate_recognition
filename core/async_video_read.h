@@ -17,8 +17,11 @@ public:
 private:
     cv::VideoCapture *video_stream;
     cv::Mat current_frame;
+    string stream_name;
     bool is_stream_opened;
     bool has_frame;
+
+    void openStream();
 };
 
 #endif

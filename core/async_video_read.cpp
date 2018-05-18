@@ -7,20 +7,27 @@
 
 AsyncVideoReader::AsyncVideoReader(string stream_name) {
 
-    while ( !is_stream_opened ) {
-        video_stream = new cv::VideoCapture( stream_name );
-        is_stream_opened = video_stream -> isOpened();
+    this -> stream_name = stream_name;
 
-        if ( !is_stream_opened ) {
-            cout << "Camera not found, is connected to the LAN?" << endl;
-            usleep( 1000000 );
-        }
-    }
+    openStream();
 
     has_frame = false;
 
     thread asyncFrameReader(&AsyncVideoReader::readFrame, this);
     asyncFrameReader.detach();
+}
+
+void AsyncVideoReader::openStream() {
+    while ( !is_stream_opened ) {
+        video_stream = new cv::VideoCapture( stream_name );
+        is_stream_opened = video_stream -> isOpened();
+
+        if ( !is_stream_opened ) {
+            cout << "Camera not found, is connected to LAN? Retrying in 1 second..." << endl << endl;
+            usleep( 1000000 );
+        }
+    }
+    cout << "Camera found!" << endl;
 }
 
 
@@ -30,6 +37,8 @@ void AsyncVideoReader::readFrame() {
 
         if ( is_stream_opened )
             has_frame = video_stream -> read( current_frame );
+        else
+            openStream();
     }
 }
 
