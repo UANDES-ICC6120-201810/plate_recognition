@@ -47,7 +47,28 @@ const int FEATURE_HEIGHT = 40;
 const int CELL_WIDTH = FEATURE_WIDTH / 4;
 const int CELL_HEIGHT = FEATURE_HEIGHT / 4;
 
-enum folderLabelsEnum { A = 10, B = 11, C = 12, D = 13, E = 14, F = 15, G = 16, H = 17, K = 18, L = 19, M = 20, N = 21, P = 22, S = 23, T = 24, U = 25, V = 26, X = 27, Y = 28, Z = 29 };
+enum folderLabelsEnum {
+    A_FOLDER = 10,
+    B_FOLDER = 11,
+    C_FOLDER = 12,
+    D_FOLDER = 13,
+    E_FOLDER = 14,
+    F_FOLDER = 15,
+    G_FOLDER = 16,
+    H_FOLDER = 17,
+    K_FOLDER = 18,
+    L_FOLDER = 19,
+    M_FOLDER = 20,
+    N_FOLDER = 21,
+    P_FOLDER = 22,
+    S_FOLDER = 23,
+    T_FOLDER = 24,
+    U_FOLDER = 25,
+    V_FOLDER = 26,
+    X_FOLDER = 27,
+    Y_FOLDER = 28,
+    Z_FOLDER = 29
+};
 
 
 #endif

@@ -29,28 +29,28 @@ char SvmCharDetector::detectCharFromImage( cv::Mat char_image ) {
 
     cv::Mat features = cv::Mat(image_features).t();
 
-    int class_folder_label = int(svm_pointer -> predict( features ));
+    int folder_label = int(svm_pointer -> predict( features ));
 
-    if (0 <= class_folder_label && class_folder_label <= 9)
-        return (char) (class_folder_label + '0');
+    if (0 <= folder_label && folder_label <= 9)
+        return (char) (folder_label + '0');
 
-    if (A <= class_folder_label && class_folder_label <= H)
-        return (char) (class_folder_label + 55);
+    if (A_FOLDER <= folder_label && folder_label <= H_FOLDER)
+        return (char) (folder_label + 55);
 
     int skip_i_j = 2;
 
-    if (K <= class_folder_label && class_folder_label <= N)
-        return (char) (class_folder_label + 55 + skip_i_j);
+    if (K_FOLDER <= folder_label && folder_label <= N_FOLDER)
+        return (char) (folder_label + 55 + skip_i_j);
 
-    if (class_folder_label == P) return 'P';
+    if (folder_label == P_FOLDER) return 'P';
 
-    if (class_folder_label == S) return 'S';
+    if (folder_label == S_FOLDER) return 'S';
 
-    if (T <= class_folder_label && class_folder_label <= V)
-        return (char) (class_folder_label + 60);
+    if (T_FOLDER <= folder_label && folder_label <= V_FOLDER)
+        return (char) (folder_label + 60);
 
-    if (X <= class_folder_label && class_folder_label <= Z)
-        return (char) (class_folder_label + 61);
+    if (X_FOLDER <= folder_label && folder_label <= Z_FOLDER)
+        return (char) (folder_label + 61);
 
     return '*';
 }
