@@ -3,7 +3,6 @@
 TOTAL_STEPS="4"
 
 TRAINING_FILE_NAME="trained-svm.xml"
-FORCE=0
 
 while test $# -gt 0
 do
