@@ -6,7 +6,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "constants.hpp"
-#include "debugger.hpp"
 
 using namespace std;
 
@@ -14,9 +13,6 @@ using namespace std;
 vector< cv::Mat > CharSegmentation::findPlateCharImages( cv::Mat plate_img ) {
     vector< cv::Rect > char_contours = findCharContours( plate_img );
     vector< cv::Mat > char_images = getPlateCharImages( plate_img, char_contours );
-
-    debugWriteRecognizedPlate( plate_img );
-    debugWriteRecognizedChars( char_images );
 
     return char_images;
 }

@@ -8,15 +8,12 @@
 #include <math.h>
 
 #include "constants.hpp"
-#include "debugger.hpp"
 
 cv::Mat source_image;
 
 vector< cv::Mat > PlateSegmentation::findPlateImages( cv::Mat source_img ) {
     source_image = source_img.clone();
     cv::Mat source_edges = sourceImageToEdges(source_img);
-
-    debugWriteImage(source_edges, "./out/debug_edges.jpg");
 
     vector< vector< cv::Point > > plates_polygons = getPolygons( source_edges );
     vector< cv::Mat > plate_images;
@@ -47,8 +44,6 @@ vector< vector< cv::Point > > PlateSegmentation::getPolygons( cv::Mat & source_e
     vector< vector< cv::Point > > contours;
     cv::findContours( source_edges, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE );
 
-    /// Find the convex hull object for each contour
-
     vector< vector< cv::Point > > polygons;
 
     for ( int index = 0; index < contours.size(); index++ ) {
@@ -62,7 +57,6 @@ vector< vector< cv::Point > > PlateSegmentation::getPolygons( cv::Mat & source_e
             cv::drawContours(source_image, polygons, polygons.size() - 1, color, 2);
         }
     }
-    debugWriteImage(source_image, "./out/debug_polygon.jpg");
 
     return polygons;
 }
