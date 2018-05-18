@@ -1,5 +1,6 @@
 #include "async_video_read.h"
 
+#include <iostream>
 #include <thread>
 #include <unistd.h>
 #include <opencv2/highgui/highgui.hpp>
@@ -12,10 +13,10 @@ AsyncVideoReader::AsyncVideoReader(string stream_name) {
 
         if ( !is_stream_opened ) {
             cout << "Camera not found, is connected to the LAN?" << endl;
-            usleep( ms * 1000 );
+            usleep( 1000000 );
         }
     }
-    
+
     has_frame = false;
 
     thread asyncFrameReader(&AsyncVideoReader::readFrame, this);
