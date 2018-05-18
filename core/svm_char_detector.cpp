@@ -65,8 +65,6 @@ vector<float> SvmCharDetector::calculateImageFeatures( cv::Mat source_image ) {
 
     int feature_index = 0;
 
-    cv::resize( clean_image, clean_image, cv::Size( FEATURE_WIDTH, FEATURE_HEIGHT ) );
-
     int image_color_pixels = colorPixelsAmount( clean_image, true );
 
     for ( int row_index = 0; row_index < clean_image.rows; row_index += CELL_HEIGHT ) {
@@ -119,6 +117,8 @@ cv::Mat SvmCharDetector::cleanSourceImage( cv::Mat source_image ) {
         cv::cvtColor(clean_image, clean_image, cv::COLOR_BGR2GRAY);
 
     cv::threshold(clean_image, clean_image, 100, 255, cv::THRESH_BINARY);
+
+    cv::resize( clean_image, clean_image, cv::Size( FEATURE_WIDTH, FEATURE_HEIGHT ) );
 
     return clean_image;
 }
@@ -174,8 +174,6 @@ vector<string> SvmCharDetector::getClassSamplePath(string class_folder_path) {
 
 
 bool SvmCharDetector::train(string training_set_path, string trained_svm_path) {
-    if (CLASS_SAMPLES_AMOUNT <= 0 || CLASSES_AMOUNT <= 0) return false;
-
     svm_pointer -> setType(cv::ml::SVM::C_SVC);
     svm_pointer -> setKernel(cv::ml::SVM::LINEAR);
     svm_pointer -> setGamma(0.5);
@@ -199,26 +197,26 @@ bool SvmCharDetector::train(string training_set_path, string trained_svm_path) {
 
     int sample_index = 0;
     std::sort(trainingFoldersPaths.begin(), trainingFoldersPaths.end());
-    for (size_t folder_index = 0; folder_index < total_class_folders; ++folder_index) {
+    for ( int folder_index = 0; folder_index < total_class_folders; folder_index++) {
 
         string class_folder_path = trainingFoldersPaths.at(folder_index);
-        vector<string> class_samples = getClassSamplePath(class_folder_path);
-        int total_class_samples = (int)class_samples.size();
+        vector<string> class_samples_paths = getClassSamplePath(class_folder_path);
+        int total_class_samples = (int)class_samples_paths.size();
 
         if (total_class_samples <= 0) {
             cout << "Missing class samples under" << class_folder_path << endl;
             return false;
         }
         if (total_class_samples != CLASS_SAMPLES_AMOUNT) {
-            cout << "Missing training class samples under" << class_folder_path << "should be" << CLASS_SAMPLES_AMOUNT << endl;
+            cout << "Training class samples under " << class_folder_path << " should be " << CLASS_SAMPLES_AMOUNT << endl;
             return false;
         }
 
-        cout << "list folder" << class_folder_path << endl;
+        cout << "list folder " << class_folder_path << endl;
         string label_folder = class_folder_path.substr(class_folder_path.length() - 1);
 
-        for (size_t j = 0; j < total_class_samples; ++j) {
-            cv::Mat class_sample_image = cv::imread(class_samples.at(j));
+        for ( int j = 0; j < CLASS_SAMPLES_AMOUNT; j++ ) {
+            cv::Mat class_sample_image = cv::imread(class_samples_paths.at(j));
 
             if (class_sample_image.empty()) {
                 return false;
@@ -226,8 +224,9 @@ bool SvmCharDetector::train(string training_set_path, string trained_svm_path) {
 
             vector<float> class_sample_features = calculateImageFeatures( class_sample_image );
 
-            for (size_t t = 0; t < class_sample_features.size(); ++t)
+            for ( int t = 0; t < SVM_FEATURES_AMOUNT; t++ )
                 samples_matrix.at<float>(sample_index, t) = class_sample_features.at(t);
+
             responses_matrix.at<int>(sample_index, 0) = folder_index;
             sample_index++;
         }
