@@ -33,10 +33,7 @@ void AsyncVideoReader::openStream() {
 
 void AsyncVideoReader::readFrame() {
     while ( true ) {
-        is_stream_opened = video_stream -> isOpened();
-
-        if ( is_stream_opened )
-            has_frame = video_stream -> read( current_frame );
+        has_frame = video_stream -> read( current_frame );
     }
 }
 
