@@ -33,6 +33,9 @@ else
     && g++ TrainSVM.cpp core/svm_char_detector.cpp $(pkg-config --libs opencv) -o TrainSVM \
     && echo "SVM compiled correctly!"\
     && echo \
+    && echo "Cleaning .DS_Store" \
+    && rm ./data/.DS_Store \
+    && find ./data/* -type f \( -name ".DS_Store" \) -delete \
     && echo "Step 2/$TOTAL_STEPS : Training SVM" \
     && ./TrainSVM
 fi
