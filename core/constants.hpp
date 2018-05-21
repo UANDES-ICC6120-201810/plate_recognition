@@ -13,6 +13,7 @@ const int CLASS_SAMPLES_AMOUNT = 10;
 const int SVM_FEATURES_AMOUNT = 32;
 
 const int PLATE_CHARS = 6;
+const string PLATE_REGEX = "([ABCDEFGHKLMNPRSTUVWXYZ][ABCDEFGHIJKLNPRSTUVWXYZ]\\d{4})|([BCDFGHJKLPRSTVWXYZ]{4}\\d{2})";
 const double PLATE_WIDTH = 360;
 const double PLATE_HEIGHT = 130;
 const string EMPTY_PLATE = "";

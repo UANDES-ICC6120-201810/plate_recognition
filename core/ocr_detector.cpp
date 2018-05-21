@@ -1,8 +1,10 @@
 #include "ocr_detector.hpp"
 
 #include <string>
+#include <regex>
 #include <opencv2/core/mat.hpp>
 
+#include "constants.hpp"
 #include "svm_char_detector.hpp"
 
 using namespace std;
@@ -22,10 +24,18 @@ string OcrDetector::plateCharsToString( vector< cv::Mat > char_images ) {
 
     }
 
-    return licence_text;
+    if ( matchesRegex( licence_text ) )
+        return licence_text;
+
+    return {};
 }
 
 
 char OcrDetector::charImageToChar( cv::Mat char_image ) {
     return svm_detector -> detectCharFromImage( char_image );
+}
+
+bool OcrDetector::matchesRegex( string license_text ) {
+    regex plate_regex(PLATE_REGEX);
+    return regex_match(license_text, plate_regex);
 }

@@ -16,6 +16,7 @@ public:
 private:
     SvmCharDetector *svm_detector;
     char charImageToChar( cv::Mat char_image);
+    bool matchesRegex( string license_text );
 };
 
 #endif
