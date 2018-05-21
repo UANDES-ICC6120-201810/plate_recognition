@@ -31,26 +31,11 @@ char SvmCharDetector::detectCharFromImage( cv::Mat char_image ) {
 
     int folder_label = int(svm_pointer -> predict( features ));
 
-    if (0 <= folder_label && folder_label <= 9)
-        return (char) (folder_label + '0');
+    if (0 <= folder_label && folder_label <= 100)
+        return (char) folder_label;
 
-    if (A_FOLDER <= folder_label && folder_label <= H_FOLDER)
-        return (char) (folder_label + 55);
-
-    int skip_i_j = 2;
-
-    if (K_FOLDER <= folder_label && folder_label <= N_FOLDER)
-        return (char) (folder_label + 55 + skip_i_j);
-
-    if (folder_label == P_FOLDER) return 'P';
-
-    if (folder_label == S_FOLDER) return 'S';
-
-    if (T_FOLDER <= folder_label && folder_label <= V_FOLDER)
-        return (char) (folder_label + 60);
-
-    if (X_FOLDER <= folder_label && folder_label <= Z_FOLDER)
-        return (char) (folder_label + 61);
+    if (100 < folder_label)
+        return (char) (folder_label - 200);
 
     return '*';
 }
@@ -146,7 +131,7 @@ vector<string> SvmCharDetector::getClassesFoldersPaths(string training_set_path)
     struct dirent *entry;
     while ((entry = readdir(dir)) != nullptr) {
         if ((strcmp(entry->d_name, ".") != 0) && (strcmp(entry->d_name, "..") != 0)) {
-            string folder_path = training_set_path + string(entry->d_name);
+            string folder_path = string(entry->d_name);
             folders.push_back(folder_path);
         }
     }
@@ -197,7 +182,9 @@ bool SvmCharDetector::train(string training_set_path, string trained_svm_path) {
     std::sort(trainingFoldersPaths.begin(), trainingFoldersPaths.end());
     for ( int folder_index = 0; folder_index < total_class_folders; folder_index++) {
 
-        string class_folder_path = trainingFoldersPaths.at(folder_index);
+        string class_folder = trainingFoldersPaths.at(folder_index);
+        string class_folder_path = training_set_path + class_folder;
+
         vector<string> class_samples_paths = getClassSamplePath(class_folder_path);
         int total_class_samples = (int)class_samples_paths.size();
 
@@ -225,7 +212,7 @@ bool SvmCharDetector::train(string training_set_path, string trained_svm_path) {
             for ( int t = 0; t < SVM_FEATURES_AMOUNT; t++ )
                 samples_matrix.at<float>(sample_index, t) = class_sample_features.at(t);
 
-            responses_matrix.at<int>(sample_index, 0) = folder_index;
+            responses_matrix.at<int>(sample_index, 0) = stoi(class_folder);
             sample_index++;
         }
     }
