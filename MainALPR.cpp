@@ -41,7 +41,10 @@ void getPlateForStream( string stream_name ) {
     while ( true ) {
         try {
             bool no_image = !asyncVideoReader -> hasFrame();
-            if ( no_image ) continue;
+            if ( no_image ) {
+                cout << "No image found" << endl;
+                continue;
+            }
 
             cv::Mat source_image = asyncVideoReader -> getFrame();
             getPlateFor( source_image );
