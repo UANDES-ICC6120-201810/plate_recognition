@@ -1,6 +1,7 @@
 #!/bin/bash
 
 
+pushd /root/ALPR/
 TRAINING_FILE_NAME="trained-svm.xml"
 TOTAL_STEPS=3
 
@@ -31,3 +32,4 @@ else
         echo "SVM compile failed"
     fi
 fi
+popd
