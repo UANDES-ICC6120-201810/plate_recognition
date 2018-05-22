@@ -48,7 +48,9 @@ void getPlateForStream( string stream_name ) {
 
         } catch (cv::Exception& e) {
             const char* err_msg = e.what();
-            std::cout << "exception caught: " << err_msg << std::endl;
+            cout << "exception caught: " << err_msg << endl;
+
+            asyncVideoReader = new AsyncVideoReader( stream_name );
         }
     }
 }
