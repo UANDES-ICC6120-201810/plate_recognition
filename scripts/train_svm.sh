@@ -13,7 +13,7 @@ then
     echo "Skipping training: $TRAINING_FILE_NAME exists"
 else
     echo "File not found..."
-    echo "Step 1/$TOTAL_STEPS : Compiling SVM training" \
+    echo "Step 1/$TOTAL_STEPS : Compiling SVM training"
     g++ TrainSVM.cpp core/svm_char_detector.cpp $(pkg-config --libs opencv) -o TrainSVM
 
     if [ $? -eq 0 ]

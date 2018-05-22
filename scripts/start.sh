@@ -1,5 +1,5 @@
 #!/bin/bash
 
 pushd /root/ALPR/
-./train_svm.sh && ./compile_alpr.sh && ./run_alpr.sh
+./scripts/train_svm.sh && ./scripts/compile_alpr.sh && ./scripts/run_alpr.sh
 popd
