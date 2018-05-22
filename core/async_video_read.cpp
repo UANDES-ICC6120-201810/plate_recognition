@@ -12,6 +12,7 @@ AsyncVideoReader::AsyncVideoReader(string stream_name) {
     openStream();
 
     has_frame = false;
+    thread_alive = true;
 
     thread asyncFrameReader(&AsyncVideoReader::readFrame, this);
     asyncFrameReader.detach();
@@ -32,7 +33,7 @@ void AsyncVideoReader::openStream() {
 
 
 void AsyncVideoReader::readFrame() {
-    while ( true ) {
+    while ( thread_alive ) {
         has_frame = video_stream -> read( current_frame );
     }
 }
@@ -48,4 +49,8 @@ bool AsyncVideoReader::isOpened() {
 
 bool AsyncVideoReader::hasFrame() {
     return has_frame;
+}
+
+void AsyncVideoReader::endThread() {
+    thread_alive = false;
 }
