@@ -39,11 +39,17 @@ void getPlateForStream( string stream_name ) {
     AsyncVideoReader *asyncVideoReader = new AsyncVideoReader( stream_name );
 
     while ( true ) {
-        bool no_image = !asyncVideoReader -> hasFrame();
-        if ( no_image ) continue;
+        try {
+            bool no_image = !asyncVideoReader -> hasFrame();
+            if ( no_image ) continue;
 
-        cv::Mat source_image = asyncVideoReader -> getFrame();
-        getPlateFor( source_image );
+            cv::Mat source_image = asyncVideoReader -> getFrame();
+            getPlateFor( source_image );
+
+        } catch (cv::Exception& e) {
+            const char* err_msg = e.what();
+            std::cout << "exception caught: " << err_msg << std::endl;
+        }
     }
 }
 
