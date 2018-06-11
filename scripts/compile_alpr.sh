@@ -10,5 +10,7 @@ then
     echo "ALPR compiled correctly!"
 else
     echo "ALPR compile failed"
+    popd > /dev/null 2>&1
+    exit 1
 fi
 popd > /dev/null 2>&1
