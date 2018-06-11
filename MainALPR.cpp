@@ -39,21 +39,16 @@ void getPlateForStream( string stream_name ) {
     AsyncVideoReader *asyncVideoReader = new AsyncVideoReader( stream_name );
 
     while ( true ) {
-        try {
-            bool no_image = !asyncVideoReader -> hasFrame();
-            if ( no_image ) {
-                cout << "No image found" << endl;
-                continue;
-            }
+        bool no_image = !asyncVideoReader -> hasFrame();
+        if ( no_image ) {
+            cout << "No image found" << endl;
+            continue;
+        }
 
-            cv::Mat source_image = asyncVideoReader -> getFrame();
+        cv::Mat source_image = asyncVideoReader -> getFrame();
+
+        if ( !source_image.empty() ) {
             getPlateFor( source_image );
-
-        } catch (cv::Exception& e) {
-            const char* err_msg = e.what();
-            cout << "exception caught: " << err_msg << endl;
-            asyncVideoReader -> endThread();
-            asyncVideoReader = new AsyncVideoReader( stream_name );
         }
     }
 }

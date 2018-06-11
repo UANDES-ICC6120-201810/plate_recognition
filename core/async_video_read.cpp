@@ -3,28 +3,29 @@
 #include <iostream>
 #include <thread>
 #include <unistd.h>
+
 #include <opencv2/highgui/highgui.hpp>
 
 AsyncVideoReader::AsyncVideoReader(string stream_name) {
-
     this -> stream_name = stream_name;
+    this -> is_stream_opened = false;
+    this -> has_frame = false;
 
     openStream();
-
-    has_frame = false;
-    thread_alive = true;
 
     thread asyncFrameReader(&AsyncVideoReader::readFrame, this);
     asyncFrameReader.detach();
 }
 
 void AsyncVideoReader::openStream() {
+    cout << "Opening camera stream..." << endl;
+
     while ( !is_stream_opened ) {
         video_stream = new cv::VideoCapture( stream_name );
         is_stream_opened = video_stream -> isOpened();
 
         if ( !is_stream_opened ) {
-            cout << "Camera not found, is connected to LAN? Retrying in 1 second..." << endl << endl;
+            cout << "Camera not found, is connected to LAN? Retrying..." << endl << endl;
             usleep( 1000000 );
         }
     }
@@ -33,8 +34,8 @@ void AsyncVideoReader::openStream() {
 
 
 void AsyncVideoReader::readFrame() {
-    while ( thread_alive ) {
-        has_frame = video_stream -> read( current_frame );
+    while ( true ) {
+        this -> has_frame = video_stream -> read( current_frame );
     }
 }
 
@@ -49,8 +50,4 @@ bool AsyncVideoReader::isOpened() {
 
 bool AsyncVideoReader::hasFrame() {
     return has_frame;
-}
-
-void AsyncVideoReader::endThread() {
-    thread_alive = false;
 }

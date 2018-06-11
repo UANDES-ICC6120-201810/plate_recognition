@@ -13,7 +13,6 @@ public:
     cv::Mat getFrame();
     bool isOpened();
     bool hasFrame();
-    void endThread();
 
 private:
     cv::VideoCapture *video_stream;
@@ -21,7 +20,6 @@ private:
     string stream_name;
     bool is_stream_opened;
     bool has_frame;
-    bool thread_alive;
 
     void openStream();
 };
