@@ -27,7 +27,7 @@ else
         echo
 
         echo "Step 2/$TOTAL_STEPS : Training SVM"
-        ./TrainSVM
+        ./TrainSVM.o
     else
         echo "SVM compile failed"
         popd > /dev/null 2>&1
