@@ -46,8 +46,6 @@ vector<float> SvmCharDetector::calculateImageFeatures( cv::Mat source_image ) {
 
     vector< float > image_features;
 
-    int feature_index = 0;
-
     int image_color_pixels = colorPixelsAmount( clean_image, true );
 
     for ( int row_index = 0; row_index < clean_image.rows; row_index += CELL_HEIGHT ) {

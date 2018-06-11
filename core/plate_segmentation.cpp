@@ -18,7 +18,7 @@ vector< cv::Mat > PlateSegmentation::findPlateImages( cv::Mat source_img ) {
     vector< vector< cv::Point > > plates_polygons = getPolygons( source_edges );
     vector< cv::Mat > plate_images;
 
-    for( int index = 0; index < plates_polygons.size(); index++ ) {
+    for( size_t index = 0; index < plates_polygons.size(); index++ ) {
         cv::Mat wrapped_plate = WrapPlateContour( source_img, plates_polygons[ index ] );
         wrapped_plate = sourceImageToBinary( wrapped_plate );
 
@@ -46,7 +46,7 @@ vector< vector< cv::Point > > PlateSegmentation::getPolygons( cv::Mat & source_e
 
     vector< vector< cv::Point > > polygons;
 
-    for ( int index = 0; index < contours.size(); index++ ) {
+    for ( size_t index = 0; index < contours.size(); index++ ) {
         vector< cv::Point > polygon = getPolygonFromContour( contours[ index ] );
 
         if ( isValidPolygon( polygon ) ) {

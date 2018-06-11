@@ -160,8 +160,6 @@ bool sortRectsByX( cv::Rect first, cv::Rect second ) {
 
 
 vector<cv::Rect> CharSegmentation::sortPlateCharsByX( vector< cv::Rect > plate_chars ) {
-    int chars_amount = plate_chars.size();
-
     sort( plate_chars.begin(), plate_chars.end(), sortRectsByX);
 
     return plate_chars;
