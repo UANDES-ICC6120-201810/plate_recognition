@@ -7,7 +7,7 @@
 using namespace std;
 
 
-int main( int argc, char *argv[] ) {
+int main() {
 
     if ( CV_MAJOR_VERSION < 3 ) {
         cout << "Old OpenCV version found, required 3+" << endl;
