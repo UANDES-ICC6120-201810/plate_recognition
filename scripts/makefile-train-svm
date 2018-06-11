@@ -1,0 +1,17 @@
+CXX=g++
+CFLAGS = -std=c++11 -Wall -Wextra -Wundef -Werror -Wuninitialized -Winit-self
+CVLIBS := $(shell pkg-config --libs opencv)
+BINARY_DIR = bin
+BINDEP = $(BINARY_DIR)/svm_char_detector.o
+
+TRAIN_FILE = TrainSVM
+
+$(TRAIN_FILE).o: TrainSVM.cpp $(BINDEP)
+	$(CXX) $(CFLAGS) $(TRAIN_FILE).cpp $(BINDEP) $(CVLIBS) -o $(TRAIN_FILE).o
+
+$(BINARY_DIR)/svm_char_detector.o: core/svm_char_detector.cpp
+	$(CXX) -c $(CFLAGS) core/svm_char_detector.cpp -o $(BINARY_DIR)/svm_char_detector.o
+
+clean:
+	-rm $(BINDEP)
+	-rm TRAIN_FILE.o

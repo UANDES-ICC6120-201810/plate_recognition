@@ -14,7 +14,7 @@ then
 else
     echo "File not found..."
     echo "Step 1/$TOTAL_STEPS : Compiling SVM training"
-    g++ TrainSVM.cpp core/svm_char_detector.cpp $(pkg-config --libs opencv) -o TrainSVM
+    make -f scripts/makefile-train-svm
 
     if [ $? -eq 0 ]
     then
@@ -30,6 +30,7 @@ else
         ./TrainSVM
     else
         echo "SVM compile failed"
+        exit 1
     fi
 fi
 popd > /dev/null 2>&1

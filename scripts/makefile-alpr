@@ -1,0 +1,32 @@
+CXX=g++
+CFLAGS = -std=c++11 -Wall -Wextra -Wundef -Werror -Wuninitialized -Winit-self
+CVLIBS := $(shell pkg-config --libs opencv)
+BINARY_DIR = bin
+BINDEP = $(BINARY_DIR)/async_video_read.o $(BINARY_DIR)/plate_segmentation.o $(BINARY_DIR)/char_segmentation.o $(BINARY_DIR)/ocr_detector.o $(BINARY_DIR)/svm_char_detector.o $(BINARY_DIR)/debugger.o
+
+ALPR_FILE = MainALPR
+
+$(ALPR_FILE).o: MainALPR.cpp $(BINDEP)
+	$(CXX) $(CFLAGS) $(ALPR_FILE).cpp $(BINDEP) -lpthread $(CVLIBS) -o $(ALPR_FILE).o
+
+$(BINARY_DIR)/async_video_read.o: core/async_video_read.cpp
+	$(CXX) -c $(CFLAGS) core/async_video_read.cpp -o $(BINARY_DIR)/async_video_read.o
+
+$(BINARY_DIR)/plate_segmentation.o: core/plate_segmentation.cpp
+	$(CXX) -c $(CFLAGS) core/plate_segmentation.cpp -o $(BINARY_DIR)/plate_segmentation.o
+
+$(BINARY_DIR)/char_segmentation.o: core/char_segmentation.cpp
+	$(CXX) -c $(CFLAGS) core/char_segmentation.cpp -o $(BINARY_DIR)/char_segmentation.o
+
+$(BINARY_DIR)/ocr_detector.o: core/ocr_detector.cpp
+	$(CXX) -c $(CFLAGS) core/ocr_detector.cpp -o $(BINARY_DIR)/ocr_detector.o
+
+$(BINARY_DIR)/svm_char_detector.o: core/svm_char_detector.cpp
+	$(CXX) -c $(CFLAGS) core/svm_char_detector.cpp -o $(BINARY_DIR)/svm_char_detector.o
+
+$(BINARY_DIR)/debugger.o: core/debugger.cpp
+	$(CXX) -c $(CFLAGS) core/debugger.cpp -o $(BINARY_DIR)/debugger.o
+
+clean:
+	-rm $(BINDEP)
+	-rm $(ALPR_FILE).o
