@@ -2,12 +2,13 @@ CXX=g++
 CFLAGS = -std=c++11 -Wall -Wextra -Wundef -Werror -Wuninitialized -Winit-self
 CVLIBS := $(shell pkg-config --libs opencv)
 BINARY_DIR = bin
-BINDEP = $(BINARY_DIR)/async_video_read.o $(BINARY_DIR)/plate_segmentation.o $(BINARY_DIR)/char_segmentation.o $(BINARY_DIR)/ocr_detector.o $(BINARY_DIR)/svm_char_detector.o $(BINARY_DIR)/debugger.o
+BINDEP = $(BINARY_DIR)/async_video_read.o $(BINARY_DIR)/plate_segmentation.o $(BINARY_DIR)/char_segmentation.o $(BINARY_DIR)/ocr_detector.o $(BINARY_DIR)/svm_char_detector.o $(BINARY_DIR)/debugger.o $(BINARY_DIR)/mysql_connector.o
+MYSQL_FLAGS = -I/usr/include/cppconn -L/usr/lib -lmysqlcppconn
 
 ALPR_FILE = MainALPR
 
 $(ALPR_FILE).o: MainALPR.cpp $(BINDEP)
-	$(CXX) $(CFLAGS) $(ALPR_FILE).cpp $(BINDEP) -lpthread $(CVLIBS) -o $(ALPR_FILE).o
+	$(CXX) $(CFLAGS) $(ALPR_FILE).cpp $(BINDEP) -lpthread $(CVLIBS) -o $(ALPR_FILE).o $(MYSQL_FLAGS)
 
 $(BINARY_DIR)/async_video_read.o: core/async_video_read.cpp
 	$(CXX) -c $(CFLAGS) core/async_video_read.cpp -o $(BINARY_DIR)/async_video_read.o
@@ -26,6 +27,9 @@ $(BINARY_DIR)/svm_char_detector.o: core/svm_char_detector.cpp
 
 $(BINARY_DIR)/debugger.o: core/debugger.cpp
 	$(CXX) -c $(CFLAGS) core/debugger.cpp -o $(BINARY_DIR)/debugger.o
+
+$(BINARY_DIR)/mysql_connector.o: core/mysql_connector.cpp
+	$(CXX) -c $(CFLAGS) core/mysql_connector.cpp -o $(BINARY_DIR)/mysql_connector.o $(MYSQL_FLAGS)
 
 clean:
 	-rm $(BINDEP)

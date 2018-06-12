@@ -9,12 +9,14 @@
 #include "core/plate_segmentation.hpp"
 #include "core/char_segmentation.hpp"
 #include "core/ocr_detector.hpp"
+#include "core/mysql_connector.h"
 
 using namespace std;
 
 
 void getPlateFor( cv::Mat source_image ) {
     OcrDetector char_detector( SVM_TRAINED_DATA_PATH );
+    MysqlConnector db_conn("docker-db:3306", "ALPR", "PASSALPR", "control_point");
 
     vector< cv::Mat > plates = PlateSegmentation().findPlateImages( source_image );
 
@@ -30,7 +32,10 @@ void getPlateFor( cv::Mat source_image ) {
 
         string plate_text = char_detector.plateCharsToString( plate_chars );
 
-        if ( plate_text != EMPTY_PLATE ) cout << plate_text << endl;
+        if ( plate_text != EMPTY_PLATE ) {
+            cout << plate_text << endl;
+            db_conn.post( plate_text );
+        }
     }
 
 }
