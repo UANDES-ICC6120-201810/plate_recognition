@@ -16,6 +16,12 @@ using namespace std;
 
 SvmCharDetector::SvmCharDetector() {
     svm_pointer = cv::ml::SVM::create();
+
+    svm_pointer -> setType(cv::ml::SVM::C_SVC);
+    svm_pointer -> setKernel(cv::ml::SVM::LINEAR);
+    svm_pointer -> setGamma(0.5);
+    svm_pointer -> setC(16);
+    svm_pointer -> setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 100, 1e-6));
 }
 
 
@@ -155,12 +161,6 @@ vector<string> SvmCharDetector::getClassSamplePath(string class_folder_path) {
 
 
 bool SvmCharDetector::train(string training_set_path, string trained_svm_path) {
-    svm_pointer -> setType(cv::ml::SVM::C_SVC);
-    svm_pointer -> setKernel(cv::ml::SVM::LINEAR);
-    svm_pointer -> setGamma(0.5);
-    svm_pointer -> setC(16);
-    svm_pointer -> setTermCriteria(cv::TermCriteria(cv::TermCriteria::MAX_ITER, 100, 1e-6));
-
     vector<string> trainingFoldersPaths = getClassesFoldersPaths(training_set_path);
     int total_class_folders = (int)trainingFoldersPaths.size();
 
