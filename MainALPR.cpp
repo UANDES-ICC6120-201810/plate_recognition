@@ -46,7 +46,6 @@ void getPlateForStream( string stream_name ) {
     while ( true ) {
         bool no_image = !asyncVideoReader -> hasFrame();
         if ( no_image ) {
-            cout << "No image found" << endl;
             continue;
         }
 
