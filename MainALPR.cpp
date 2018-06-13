@@ -50,10 +50,7 @@ void getPlateForStream( string stream_name ) {
         }
 
         cv::Mat source_image = asyncVideoReader -> getFrame();
-
-        if ( !source_image.empty() ) {
-            getPlateFor( source_image );
-        }
+        getPlateFor( source_image );
     }
 }
 
