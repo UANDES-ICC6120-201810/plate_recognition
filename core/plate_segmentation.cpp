@@ -52,9 +52,6 @@ vector< vector< cv::Point > > PlateSegmentation::getPolygons( cv::Mat & source_e
         if ( isValidPolygon( polygon ) ) {
             polygon = OrderPolygonCorners( polygon );
             polygons.push_back( polygon );
-
-            cv::Scalar color( rand()&255, rand()&255, rand()&255 );
-            cv::drawContours(source_image, polygons, polygons.size() - 1, color, 2);
         }
     }
 
