@@ -36,8 +36,7 @@ vector< cv::Rect> CharSegmentation::getCharRects( cv::Mat *binary_img ) {
 
     if ( isNotValidCrop ) return {};
 
-    cv::Mat cropped_img( *binary_img );
-    cropped_img = cropped_img( horizontalCrop );
+    cv::Mat cropped_img = ( *binary_img )( horizontalCrop );
     int original_y_offset = horizontalCrop.y;
 
     vector< cv::Rect > detected_chars = getVerticalCropCharRects( &cropped_img, original_y_offset );
@@ -86,9 +85,7 @@ cv::Rect CharSegmentation::getHorizontalCropPlateRect( cv::Mat *binary_img ) {
 
 
 bool CharSegmentation::isRowEmpty( cv::Mat *binary_img, int row_index ) {
-    cv::Mat row_img(*binary_img);
-
-    row_img = row_img( cv::Rect( 0, row_index, binary_img -> cols, 1 ) );
+    cv::Mat row_img = (*binary_img)( cv::Rect( 0, row_index, binary_img -> cols, 1 ) );
 
     double row_white_pixels = cv::countNonZero( row_img );
 
@@ -147,8 +144,7 @@ vector< cv::Rect > CharSegmentation::getVerticalCropCharRects( cv::Mat *plate_im
 
 
 bool CharSegmentation::isColEmpty( cv::Mat *binary_img, int col_index ) {
-    cv::Mat row_img( *binary_img );
-    row_img = row_img( cv::Rect( col_index, 0, 1, binary_img -> rows ) );
+    cv::Mat row_img = ( *binary_img )( cv::Rect( col_index, 0, 1, binary_img -> rows ) );
 
     double col_white_pixels = cv::countNonZero( row_img );
 
@@ -175,8 +171,7 @@ vector< cv::Mat > CharSegmentation::getPlateCharImages(cv::Mat *plate_img, vecto
 
     for ( size_t index = 0; index < char_contours.size(); index++ ) {
         cv::Rect char_contour = char_contours.at( index );
-        cv::Mat char_image( *plate_img );
-        char_image = char_image( char_contour );
+        cv::Mat char_image = ( *plate_img )( char_contour );
 
         char_images.push_back( char_image );
     }
