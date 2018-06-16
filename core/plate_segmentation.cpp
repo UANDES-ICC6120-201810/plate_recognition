@@ -9,10 +9,7 @@
 
 #include "constants.hpp"
 
-cv::Mat source_image;
-
 vector< cv::Mat > PlateSegmentation::findPlateImages( cv::Mat source_img ) {
-    source_image = source_img.clone();
     cv::Mat source_edges = sourceImageToEdges(source_img);
 
     vector< vector< cv::Point > > plates_polygons = getPolygons( source_edges );
