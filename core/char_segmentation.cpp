@@ -10,7 +10,7 @@
 using namespace std;
 
 
-vector< cv::Mat > CharSegmentation::findPlateCharImages( cv::Mat plate_img ) {
+vector< cv::Mat > CharSegmentation::findPlateCharImages( cv::Mat *plate_img ) {
     vector< cv::Rect > char_contours = findCharContours( plate_img );
     vector< cv::Mat > char_images = getPlateCharImages( plate_img, char_contours );
 
@@ -18,7 +18,7 @@ vector< cv::Mat > CharSegmentation::findPlateCharImages( cv::Mat plate_img ) {
 }
 
 
-vector< cv::Rect > CharSegmentation::findCharContours( cv::Mat plate_img ) {
+vector< cv::Rect > CharSegmentation::findCharContours( cv::Mat *plate_img ) {
     vector< cv::Rect > valid_contours = getCharRects( plate_img );
 
     bool detected_enough_chars = valid_contours.size() >= PLATE_CHARS;
@@ -30,24 +30,25 @@ vector< cv::Rect > CharSegmentation::findCharContours( cv::Mat plate_img ) {
 }
 
 
-vector< cv::Rect> CharSegmentation::getCharRects( cv::Mat binary_img ) {
+vector< cv::Rect> CharSegmentation::getCharRects( cv::Mat *binary_img ) {
     cv::Rect horizontalCrop = getHorizontalCropPlateRect(binary_img);
     bool isNotValidCrop = !isValidPlateCropRect( horizontalCrop );
 
     if ( isNotValidCrop ) return {};
 
-    cv::Mat cropped_img = binary_img( horizontalCrop );
+    cv::Mat cropped_img( *binary_img );
+    cropped_img = cropped_img( horizontalCrop );
     int original_y_offset = horizontalCrop.y;
 
-    vector< cv::Rect > detected_chars = getVerticalCropCharRects( cropped_img, original_y_offset );
+    vector< cv::Rect > detected_chars = getVerticalCropCharRects( &cropped_img, original_y_offset );
 
     return detected_chars;
 }
 
 
-cv::Rect CharSegmentation::getHorizontalCropPlateRect( cv::Mat binary_img ) {
-    const int img_width = binary_img.cols;
-    const int img_height = binary_img.rows;
+cv::Rect CharSegmentation::getHorizontalCropPlateRect( cv::Mat *binary_img ) {
+    const int img_width = binary_img -> cols;
+    const int img_height = binary_img -> rows;
 
     int upper_px = 0;
     int lower_px = -1;
@@ -84,12 +85,14 @@ cv::Rect CharSegmentation::getHorizontalCropPlateRect( cv::Mat binary_img ) {
 }
 
 
-bool CharSegmentation::isRowEmpty( cv::Mat binary_img, int row_index ) {
-    cv::Mat row_img = binary_img( cv::Rect( 0, row_index, binary_img.cols, 1 ) );
+bool CharSegmentation::isRowEmpty( cv::Mat *binary_img, int row_index ) {
+    cv::Mat row_img(*binary_img);
+
+    row_img = row_img( cv::Rect( 0, row_index, binary_img -> cols, 1 ) );
 
     double row_white_pixels = cv::countNonZero( row_img );
 
-    double white_pixel_percentage = row_white_pixels / binary_img.cols;
+    double white_pixel_percentage = row_white_pixels / binary_img -> cols;
 
     return white_pixel_percentage > EMPTY_ROW_RATIO;
 }
@@ -103,8 +106,8 @@ bool CharSegmentation::isValidPlateCropRect( cv::Rect plate_crop_rect ) {
 }
 
 
-vector< cv::Rect > CharSegmentation::getVerticalCropCharRects( cv::Mat plate_img, int original_y_offset ) {
-    const int char_height = plate_img.size().height;
+vector< cv::Rect > CharSegmentation::getVerticalCropCharRects( cv::Mat *plate_img, int original_y_offset ) {
+    const int char_height = plate_img -> size().height;
 
     int left_x_coord = 0;
     int right_x_coord = -1;
@@ -113,7 +116,7 @@ vector< cv::Rect > CharSegmentation::getVerticalCropCharRects( cv::Mat plate_img
 
     vector< cv::Rect > detected_chars;
 
-    for ( int col_index = 0; col_index < plate_img.cols; col_index++ ) {
+    for ( int col_index = 0; col_index < plate_img -> cols; col_index++ ) {
         bool is_col_empty = isColEmpty( plate_img, col_index );
 
         bool detected_right_px = right_x_coord != -1;
@@ -143,12 +146,13 @@ vector< cv::Rect > CharSegmentation::getVerticalCropCharRects( cv::Mat plate_img
 }
 
 
-bool CharSegmentation::isColEmpty( cv::Mat binary_img, int col_index ) {
-    cv::Mat row_img = binary_img( cv::Rect( col_index, 0, 1, binary_img.rows ) );
+bool CharSegmentation::isColEmpty( cv::Mat *binary_img, int col_index ) {
+    cv::Mat row_img( *binary_img );
+    row_img = row_img( cv::Rect( col_index, 0, 1, binary_img -> rows ) );
 
     double col_white_pixels = cv::countNonZero( row_img );
 
-    double white_pixel_percentage = col_white_pixels / binary_img.rows;
+    double white_pixel_percentage = col_white_pixels / binary_img -> rows;
 
     return white_pixel_percentage > EMPTY_COL_RATIO;
 }
@@ -166,12 +170,13 @@ vector<cv::Rect> CharSegmentation::sortPlateCharsByX( vector< cv::Rect > plate_c
 }
 
 
-vector< cv::Mat > CharSegmentation::getPlateCharImages(cv::Mat plate_img, vector< cv::Rect > char_contours) {
+vector< cv::Mat > CharSegmentation::getPlateCharImages(cv::Mat *plate_img, vector< cv::Rect > char_contours) {
     vector< cv::Mat > char_images;
 
     for ( size_t index = 0; index < char_contours.size(); index++ ) {
         cv::Rect char_contour = char_contours.at( index );
-        cv::Mat char_image = plate_img( char_contour );
+        cv::Mat char_image( *plate_img );
+        char_image = char_image( char_contour );
 
         char_images.push_back( char_image );
     }

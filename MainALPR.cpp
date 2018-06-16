@@ -14,9 +14,9 @@
 using namespace std;
 
 
-void getPlateFor( cv::Mat source_image ) {
+void getPlateFor( cv::Mat *source_image ) {
     OcrDetector char_detector( SVM_TRAINED_DATA_PATH );
-    MysqlConnector db_conn("docker-db:3306", "ALPR", "PASSALPR", "control_point");
+    // MysqlConnector db_conn("docker-db:3306", "ALPR", "PASSALPR", "control_point");
 
     vector< cv::Mat > plates = PlateSegmentation().findPlateImages( source_image );
 
@@ -28,13 +28,13 @@ void getPlateFor( cv::Mat source_image ) {
     for ( size_t index = 0; index < plates.size(); index++ ) {
         cv::Mat plate_image = plates.at(index);
 
-        vector< cv::Mat > plate_chars = char_divider.findPlateCharImages( plate_image );
+        vector< cv::Mat > plate_chars = char_divider.findPlateCharImages( &plate_image );
 
         string plate_text = char_detector.plateCharsToString( plate_chars );
 
         if ( plate_text != EMPTY_PLATE ) {
             cout << plate_text << endl;
-            db_conn.post( plate_text );
+            // db_conn.post( plate_text );
         }
     }
 
@@ -50,7 +50,7 @@ void getPlateForStream( string stream_name ) {
         }
 
         cv::Mat source_image = asyncVideoReader -> getFrame();
-        getPlateFor( source_image );
+        getPlateFor( &source_image );
     }
 }
 
@@ -74,7 +74,7 @@ int main( int argc, char *argv[] ) {
         source_file_name = argv[1];
 
         cv::Mat source_image = cv::imread( source_file_name );
-        getPlateFor( source_image );
+        getPlateFor( &source_image );
 
     } else {
         return 1;

@@ -9,7 +9,7 @@
 
 #include "constants.hpp"
 
-vector< cv::Mat > PlateSegmentation::findPlateImages( cv::Mat source_img ) {
+vector< cv::Mat > PlateSegmentation::findPlateImages( cv::Mat *source_img ) {
     cv::Mat source_edges = sourceImageToEdges(source_img);
 
     vector< vector< cv::Point > > plates_polygons = getPolygons( source_edges );
@@ -25,9 +25,9 @@ vector< cv::Mat > PlateSegmentation::findPlateImages( cv::Mat source_img ) {
     return plate_images;
 }
 
-cv::Mat PlateSegmentation::sourceImageToEdges(cv::Mat source_image) {
+cv::Mat PlateSegmentation::sourceImageToEdges(cv::Mat *source_image) {
     cv::Mat source_gray;
-    cv::cvtColor(source_image, source_gray, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(*source_image, source_gray, cv::COLOR_BGR2GRAY);
 
     cv::blur(source_gray, source_gray, cv::Size(3, 3));
 
@@ -108,12 +108,12 @@ double PlateSegmentation::PointOriginDistance( cv::Point point ) {
     return sqrt( ( pow( point.x, 2 ) + pow( point.y, 2 ) ) );
 }
 
-cv::Mat PlateSegmentation::WrapPlateContour( cv::Mat source_img, vector< cv::Point > plate_polygons ) {
+cv::Mat PlateSegmentation::WrapPlateContour( cv::Mat *source_img, vector< cv::Point > plate_polygons ) {
     cv::Mat warped_plate( PLATE_HEIGHT, PLATE_WIDTH, CV_8UC3 );
     vector< cv::Point> real_plate_polygons;
     real_plate_polygons = { cv::Point(PLATE_WIDTH, PLATE_HEIGHT), cv::Point(0, PLATE_HEIGHT), cv::Point(0, 0), cv::Point(PLATE_WIDTH, 0) };
     cv::Mat homography = cv::findHomography( plate_polygons, real_plate_polygons );
-    cv::warpPerspective(source_img, warped_plate, homography, cv::Size(PLATE_WIDTH, PLATE_HEIGHT));
+    cv::warpPerspective(*source_img, warped_plate, homography, cv::Size(PLATE_WIDTH, PLATE_HEIGHT));
 
     return warped_plate;
 }
