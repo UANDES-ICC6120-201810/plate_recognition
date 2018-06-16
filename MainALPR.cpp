@@ -16,7 +16,7 @@ using namespace std;
 
 void getPlateFor( cv::Mat *source_image ) {
     OcrDetector char_detector( SVM_TRAINED_DATA_PATH );
-    // MysqlConnector db_conn("docker-db:3306", "ALPR", "PASSALPR", "control_point");
+    MysqlConnector db_conn("docker-db:3306", "ALPR", "PASSALPR", "control_point");
 
     vector< cv::Mat > plates = PlateSegmentation().findPlateImages( source_image );
 
@@ -34,7 +34,7 @@ void getPlateFor( cv::Mat *source_image ) {
 
         if ( plate_text != EMPTY_PLATE ) {
             cout << plate_text << endl;
-            // db_conn.post( plate_text );
+            db_conn.post( plate_text );
         }
     }
 
