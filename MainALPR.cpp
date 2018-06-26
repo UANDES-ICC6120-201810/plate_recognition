@@ -34,7 +34,7 @@ void getPlateFor( cv::Mat *source_image ) {
 
         if ( plate_text != EMPTY_PLATE ) {
             cout << plate_text << endl;
-            db_conn.post( plate_text );
+            db_conn.async_post( plate_text );
         }
     }
 

@@ -15,7 +15,8 @@
 class MysqlConnector {
 public:
     MysqlConnector( std::string host, std::string user, std::string password, std::string database );
-    bool post( std::string plate );
+    void async_post( std::string plate );
+    void post( std::string plate );
     ~MysqlConnector();
 
 private:

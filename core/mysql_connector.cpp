@@ -4,7 +4,10 @@
 
 #include "mysql_connector.h"
 
+#include <iostream>
 #include <string>
+#include <thread>
+#include <unistd.h>
 
 #include "mysql_connection.h"
 #include <cppconn/driver.h>
@@ -13,21 +16,35 @@
 #include <cppconn/exception.h>
 
 MysqlConnector::MysqlConnector( std::string host, std::string user, std::string password, std::string database ) {
-    this -> driver = get_driver_instance();
-    this -> connection = driver -> connect( host, user, password );
+    while ( true ) {
+        try {
+            std::cout << "Connecting to db.." << std::endl;
+            this -> driver = get_driver_instance();
+            this -> connection = driver -> connect( host, user, password );
 
-    this -> connection -> setSchema( database );
-    this -> statement = connection -> createStatement();
+            this -> connection -> setSchema( database );
+            this -> statement = connection -> createStatement();
+
+            return;
+        } catch ( sql::SQLException &e ) {
+            std::cout << "Connection failed! Retrying..." << std::endl;
+            usleep( 1000000 );
+        }
+    }
 }
 
-bool MysqlConnector::post( std::string plate ) {
-    try {
-        statement -> executeQuery( "INSERT INTO plate_readings(plate) VALUES ('"  + plate + "')" );
-    } catch (sql::SQLException &e) {
-        return false;
-    }
+void MysqlConnector::async_post(std::string plate) {
+    std::thread asyncDbPost(&MysqlConnector::post, this, plate);
+    asyncDbPost.detach();
+}
 
-    return true;
+void MysqlConnector::post( std::string plate ) {
+    while ( true ) {
+        try {
+            statement -> executeQuery( "INSERT INTO plate_readings(plate) VALUES ('" + plate + "')" );
+            return;
+        } catch ( sql::SQLException &e ) {}
+    }
 }
 
 MysqlConnector::~MysqlConnector() {
