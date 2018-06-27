@@ -8,6 +8,13 @@ using namespace std;
 const string SVM_TRAINED_DATA_PATH = "trained-svm.xml";
 const string SVM_TRAINING_DATA_PATH = "./data/";
 
+const string DATABASE_HOST_PORT = "docker-db:3306";
+const string DATABASE_USER = "ALPR";
+const string DATABASE_USER_PASS = "PASSALPR";
+const string DATABASE_NAME = "control_point";
+
+const string CAMERA_STREAM_URL = "rtsp://taller:taller2018@192.168.1.10:88/videoMain";
+
 const int CLASSES_AMOUNT = 43;
 const int CLASS_SAMPLES_AMOUNT = 10;
 const int SVM_FEATURES_AMOUNT = 32;

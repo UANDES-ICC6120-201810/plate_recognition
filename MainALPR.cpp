@@ -24,9 +24,9 @@ void getPlateFor( cv::Mat *source_image ) {
     if ( plates.size() < 1 ) return;
 
     for ( size_t index = 0; index < plates.size(); index++ ) {
-        cv::Mat plate_image = plates.at(index);
+        cv::Mat *plate_image = &plates.at(index);
 
-        vector< cv::Mat > plate_chars = char_divider -> findPlateCharImages( &plate_image );
+        vector< cv::Mat > plate_chars = char_divider -> findPlateCharImages( plate_image );
 
         string plate_text = char_detector -> plateCharsToString( plate_chars );
 
@@ -63,11 +63,11 @@ int main( int argc, char *argv[] ) {
     string source_file_name;
 
     char_detector = new OcrDetector( SVM_TRAINED_DATA_PATH );
-    db_conn = new MysqlConnector("docker-db:3306", "ALPR", "PASSALPR", "control_point");
+    db_conn = new MysqlConnector(DATABASE_HOST_PORT, DATABASE_USER, DATABASE_USER_PASS, DATABASE_NAME);
     plate_divider = new PlateSegmentation();
 
     if ( argc < 2 ) {
-        source_file_name = "rtsp://taller:taller2018@192.168.1.10:88/videoMain";
+        source_file_name = CAMERA_STREAM_URL;
         getPlateForStream( source_file_name );
 
         cout << "ALPR: Ending stream capture..." << endl;
