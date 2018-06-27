@@ -13,28 +13,26 @@
 
 using namespace std;
 
+MysqlConnector *db_conn;
+OcrDetector *char_detector;
+CharSegmentation *char_divider;
+PlateSegmentation *plate_divider;
 
 void getPlateFor( cv::Mat *source_image ) {
-    OcrDetector char_detector( SVM_TRAINED_DATA_PATH );
-    MysqlConnector db_conn("docker-db:3306", "ALPR", "PASSALPR", "control_point");
-
-    vector< cv::Mat > plates = PlateSegmentation().findPlateImages( source_image );
-
+    vector< cv::Mat > plates = plate_divider -> findPlateImages( source_image );
 
     if ( plates.size() < 1 ) return;
-
-    CharSegmentation char_divider;
 
     for ( size_t index = 0; index < plates.size(); index++ ) {
         cv::Mat plate_image = plates.at(index);
 
-        vector< cv::Mat > plate_chars = char_divider.findPlateCharImages( &plate_image );
+        vector< cv::Mat > plate_chars = char_divider -> findPlateCharImages( &plate_image );
 
-        string plate_text = char_detector.plateCharsToString( plate_chars );
+        string plate_text = char_detector -> plateCharsToString( plate_chars );
 
         if ( plate_text != EMPTY_PLATE ) {
             cout << plate_text << endl;
-            db_conn.async_post( plate_text );
+            db_conn -> async_post( plate_text );
         }
     }
 
@@ -63,6 +61,10 @@ int main( int argc, char *argv[] ) {
     }
 
     string source_file_name;
+
+    char_detector = new OcrDetector( SVM_TRAINED_DATA_PATH );
+    db_conn = new MysqlConnector("docker-db:3306", "ALPR", "PASSALPR", "control_point");
+    plate_divider = new PlateSegmentation();
 
     if ( argc < 2 ) {
         source_file_name = "rtsp://taller:taller2018@192.168.1.10:88/videoMain";
