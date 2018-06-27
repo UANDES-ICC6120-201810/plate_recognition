@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-pushd /root/ALPR/ > /dev/null 2>&1
+pushd /root/ > /dev/null 2>&1
 TRAINING_FILE_NAME="trained-svm.xml"
 TOTAL_STEPS=3
 
