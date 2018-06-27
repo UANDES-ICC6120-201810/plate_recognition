@@ -41,7 +41,8 @@ void MysqlConnector::async_post(std::string plate) {
 void MysqlConnector::post( std::string plate ) {
     while ( true ) {
         try {
-            statement -> executeQuery( "INSERT INTO plate_readings(plate) VALUES ('" + plate + "')" );
+            cout << "Inserting into plate_readings" << endl;
+            statement -> execute( "INSERT INTO plate_readings(plate) VALUES ('" + plate + "')" );
             return;
         } catch ( sql::SQLException &e ) {}
     }
