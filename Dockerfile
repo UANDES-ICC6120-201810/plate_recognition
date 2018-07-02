@@ -47,4 +47,4 @@ RUN apt-get update \
     && sudo ldconfig -v
 
 # Run start script when starting the container not when building the image
-CMD ./root/start.sh
+CMD sh /root/start.sh
