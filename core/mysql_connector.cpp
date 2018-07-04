@@ -18,7 +18,7 @@
 MysqlConnector::MysqlConnector( std::string host, std::string user, std::string password, std::string database ) {
     while ( true ) {
         try {
-            std::cout << "Connecting to db.." << std::endl;
+            std::cout << "[Info] Connecting to db.." << std::endl;
             this -> driver = get_driver_instance();
             this -> connection = driver -> connect( host, user, password );
 
@@ -27,7 +27,7 @@ MysqlConnector::MysqlConnector( std::string host, std::string user, std::string 
 
             return;
         } catch ( sql::SQLException &e ) {
-            std::cout << "Connection failed! Retrying..." << std::endl;
+            std::cout << "[Error] Connection failed! Retrying..." << std::endl;
             usleep( 1000000 );
         }
     }
@@ -39,12 +39,29 @@ void MysqlConnector::async_post(std::string plate) {
 }
 
 void MysqlConnector::post( std::string plate ) {
-    while ( true ) {
+    int inserted_rows = 0;
+    sql::PreparedStatement  *query;
+
+    query = this -> connection -> prepareStatement("INSERT INTO plate_readings(plate) VALUES (?)");
+
+    int post_tries = 1;
+    int max_post_tries = 20;
+
+    while ( inserted_rows == 0 && post_tries <= max_post_tries ) {
+        std::cout << "[Info] Try " << post_tries << " of " << max_post_tries << ": Inserting '" << plate << "' into plate_readings" << std::endl;
+        
         try {
-            std::cout << "Inserting into plate_readings" << std::endl;
-            statement -> execute( "INSERT INTO plate_readings(plate) VALUES ('" + plate + "')" );
-            return;
-        } catch ( sql::SQLException &e ) {}
+            query -> setString(1, plate);
+            inserted_rows = query -> executeUpdate();
+            delete query;
+            std::cout << "[Info] Post of plate'" << plate << "' was successful!" << std::endl;
+
+        } catch ( sql::SQLException &e ) {
+            std::cout << "[Error] Got SQLException while inserting into DB! Retrying..." << std::endl;
+            usleep( 1000000 );
+        }
+
+        post_tries++;
     }
 }
 
