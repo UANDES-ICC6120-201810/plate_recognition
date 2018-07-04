@@ -57,7 +57,6 @@ void MysqlConnector::post( std::string plate ) {
             
         } catch ( sql::SQLException &e ) {
             std::cout << "[Error] Got SQLException while inserting into DB! Retrying..." << std::endl;
-            usleep( 1000000 );
         }
         post_mutex.unlock();
 
