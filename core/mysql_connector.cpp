@@ -40,9 +40,6 @@ void MysqlConnector::async_post(std::string plate) {
 
 void MysqlConnector::post( std::string plate ) {
     int inserted_rows = 0;
-    sql::PreparedStatement  *query;
-
-    query = this -> connection -> prepareStatement("INSERT INTO plate_readings(plate) VALUES (?)");
 
     int post_tries = 1;
     int max_post_tries = 20;
@@ -51,9 +48,7 @@ void MysqlConnector::post( std::string plate ) {
         std::cout << "[Info] Try " << post_tries << " of " << max_post_tries << ": Inserting '" << plate << "' into plate_readings" << std::endl;
         
         try {
-            query -> setString(1, plate);
-            inserted_rows = query -> executeUpdate();
-            delete query;
+            inserted_rows = statement -> executeUpdate( "INSERT INTO plate_readings(plate) VALUES ('" + plate + "')" );
             std::cout << "[Info] Post of plate'" << plate << "' was successful!" << std::endl;
 
         } catch ( sql::SQLException &e ) {
