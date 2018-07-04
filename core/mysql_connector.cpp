@@ -48,10 +48,10 @@ void MysqlConnector::post( std::string plate ) {
     int max_post_tries = 2;
 
     while ( inserted_rows == 0 && post_tries <= max_post_tries ) {
-        std::cout << "[Info] Try " << post_tries << " of " << max_post_tries << ": Inserting '" << plate << "' into plate_readings" << std::endl;
         
         post_mutex.lock();
         try {
+            std::cout << "[Info] Try " << post_tries << " of " << max_post_tries << ": Inserting '" << plate << "' into plate_readings" << std::endl;
             inserted_rows = statement -> executeUpdate( "INSERT INTO plate_readings(plate) VALUES ('" + plate + "')" );
             std::cout << "[Info] Post of plate'" << plate << "' was successful!" << std::endl;
             
